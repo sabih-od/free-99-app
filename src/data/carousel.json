@@ -1,0 +1,32 @@
+{
+  "data": {
+    "detail": {
+      "address": null,
+      "city": null,
+      "code_expire_at": null,
+      "country": null,
+      "created_at": "2023-11-14T09:27:28.000000Z",
+      "device_token": null,
+      "email": "java@gmail.com",
+      "email_verified_at": null,
+      "gender": null,
+      "id": 16,
+      "media": [Array
+      ],
+      "name": "Patricia Mccall",
+      "phone": null,
+      "profile_picture": "https://free99us.com/images/no-profile-img.jpg",
+      "roles": [Array
+      ],
+      "state_id": null,
+      "status": 1,
+      "stripe_account_id": null,
+      "updated_at": "2023-11-14T09:27:28.000000Z",
+      "user_subscription": null,
+      "verify_code": null,
+      "zip": null
+    },
+    "token": "7|XvsH1myNAKyjPHi9NgW5tMTM5x7GOMbF4QyWwYRt"
+  },
+  "message": "Successfully registered!"
+}

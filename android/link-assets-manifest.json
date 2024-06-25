@@ -1,0 +1,25 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/Dfonts - Free Fonts Download.url",
+      "sha1": "95cc7fa2d6c65461c8c03788488db94690e6dc83"
+    },
+    {
+      "path": "assets/fonts/FreightBigPro-Bold.ttf",
+      "sha1": "1034461dc2a5ec7890c9fe2a6fb3ec7db475f925"
+    },
+    {
+      "path": "assets/fonts/FreightBigPro-Semibold.ttf",
+      "sha1": "dd94686d266788c99f2c7ca2ec4347f43d9e5970"
+    },
+    {
+      "path": "assets/fonts/Poppins-Medium.ttf",
+      "sha1": "283f21b44efbdbf276ba802be2d949a36bbc4233"
+    },
+    {
+      "path": "assets/fonts/Poppins-Regular.ttf",
+      "sha1": "fdd3002e7d814ee47c1c1b8487c72c6bbb3a2d00"
+    }
+  ]
+}

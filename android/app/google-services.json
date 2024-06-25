@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "523547259144",
+    "project_id": "free99-8a435",
+    "storage_bucket": "free99-8a435.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523547259144:android:2c2b2740466c3792e7bcbd",
+        "android_client_info": {
+          "package_name": "com.free99"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbAsMQNESwhIjfn1D-Erhx6-QI1Fap0uQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
