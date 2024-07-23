@@ -52,6 +52,7 @@ const Products = ({ title }) => {
     const width = Dimensions.get('window').width; // Get the window width
     const loading = useSelector(state => state.shop.loading); // Assume loading state from auth slice
     const categoryProduct = useSelector(state => state.shop.categoryProduct); // Products from the shop slice
+    console.log('categoryProductcategoryProduct', categoryProduct)
     const navigation = useNavigation()
 
     return (
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
     skeletonItem: {
         width: '100%',
         height: 220,
-        backgroundColor: 'grey',
+        backgroundColor: '#525252',
         borderRadius: 8,
         marginBottom: 10,
     },
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     smallRow: {
-        backgroundColor: 'grey',
+        backgroundColor: '#525252',
         borderRadius: 4,
     },
 });

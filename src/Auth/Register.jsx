@@ -69,7 +69,7 @@ const Register = ({ navigation }) => {
                                 <View style={GlobalStyle.inputContainer}>
                                     <TextInput
                                         style={GlobalStyle.input}
-                                        placeholder='Full Name'
+                                        placeholder='Enter Full Name'
                                         placeholderTextColor={'#707070'}
                                         keyboardType='default'
                                         autoCapitalize='none'
@@ -86,7 +86,7 @@ const Register = ({ navigation }) => {
                                 <View style={GlobalStyle.inputContainer}>
                                     <TextInput
                                         style={GlobalStyle.input}
-                                        placeholder='Email Address'
+                                        placeholder='Enter Email Address'
                                         placeholderTextColor={'#707070'}
                                         keyboardType='email-address'
                                         autoCapitalize='none'
@@ -101,7 +101,7 @@ const Register = ({ navigation }) => {
                                 <View style={GlobalStyle.inputContainer}>
                                     <TextInput
                                         style={GlobalStyle.input}
-                                        placeholder='Password'
+                                        placeholder='Enter Password'
                                         placeholderTextColor={'#707070'}
                                         keyboardType='default'
                                         secureTextEntry={passwordVisible}
@@ -131,7 +131,7 @@ const Register = ({ navigation }) => {
                                 <View style={GlobalStyle.inputContainer}>
                                     <TextInput
                                         style={GlobalStyle.input}
-                                        placeholder='Confirm Password'
+                                        placeholder='Enter Confirm Password'
                                         placeholderTextColor={'#707070'}
                                         keyboardType='default'
                                         secureTextEntry={passwordVisible}

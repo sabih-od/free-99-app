@@ -50,7 +50,7 @@ const ForgetPassword = ({ navigation, route }) => {
                                 <View style={GlobalStyle.inputContainer}>
                                     <TextInput
                                         style={GlobalStyle.input}
-                                        placeholder='Email Address'
+                                        placeholder='Enter Email Address'
                                         placeholderTextColor={'#707070'}
                                         keyboardType='email-address'
                                         autoCapitalize='none'

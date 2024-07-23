@@ -1,4 +1,4 @@
-package com.free99
+package com.app.free99
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

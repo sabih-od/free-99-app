@@ -47,18 +47,22 @@ export const shopService = {
             store.dispatch(setLoading(false));
         }
     },
-    getAllCategoriesProducts: async () => {
-        try {
-            const { token } = store.getState().auth;
+    getAllCategoriesProducts: async (url = '/shop/category') => {
+    try {
+        const { token } = store.getState().auth;
 
-            const response = await apiClient.get('/shop/category/fashion');
+        const response = await apiClient.get(url, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
 
-            store.dispatch(setAllCategoryProucts(response.data.data.products));
+        store.dispatch(setAllCategoryProucts(response.data.data.products));
 
-            return response.data;
-        } catch (error) {
-            console.log('error', error);
-            throw error;
-        }
-    },
+        return response.data;
+    } catch (error) {
+        console.log('error', error);
+        throw error;
+    }
+}
 };

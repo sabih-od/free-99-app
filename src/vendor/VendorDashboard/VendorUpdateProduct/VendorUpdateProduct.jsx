@@ -1,6 +1,6 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert, Image, ActivityIndicator } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert, Image, ActivityIndicator, Dimensions, ImageBackground } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
-import { bgColor, generalFontSize, GlobalStyle, textColor, fontFamily, whiteColor, windowHeight } from '../../../Styles/Theme';
+import { bgColor, generalFontSize, GlobalStyle, textColor, fontFamily, whiteColor, windowHeight, windowWidth } from '../../../Styles/Theme';
 import UploadImage from '../../../Components/UploadImage/UploadImage';
 import { TextInput } from 'react-native-gesture-handler';
 import ImagePicker from 'react-native-image-crop-picker';
@@ -18,8 +18,12 @@ import { errorToast, successToast } from '../../../Utils/toast';
 
 const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) => {
     const category = useSelector((state) => state.shop.category);
+    const image_id = updateProduct?.media?.map((item)=> item?.id)
+    const product_id = updateProduct?.id
+    console.log('category', category)
     const loading = useSelector((state) => state.auth.loading);
-    const [photo, setPhoto] = useState('');
+    const [photos, setPhotos] = useState([]);
+    const [featuredImage, setFeaturedImage] = useState(null);
     const [gallery, setGallery] = useState([]);
     const [_category, _setCategory] = useState([]);
     const [cat, setCat] = useState('');
@@ -29,6 +33,7 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
     const [isFavourites, setIsFavourites] = useState(false);
     const [imgErr, setImgErr] = useState(false);
     const [uptLoad, setUptLoad] = useState()
+    const [isDeleted, setIsDeleted] = useState(false)
 
     const scrollViewRef = useRef();
 
@@ -42,14 +47,35 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
         );
     };
 
+    // const imagePicker = () => {
+    //     ImagePicker.openPicker({
+    //         multiple: true,
+    //         width: 400,
+    //         height: 400,
+    //         cropping: true
+    //     }).then(images => {
+    //         setPhotos(images);
+    //         // setImagePickerImage(Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path);
+    //         setImgErr(false);
+    //     }).catch(error => {
+    //         console.error('Image Picker Error:', error);
+    //         Alert.alert('Error', 'An error occurred while picking the image. Please try again.');
+    //     });
+    // };
+
     const imagePicker = () => {
         ImagePicker.openPicker({
-            width: 300,
+            multiple: true,
+            width: 400,
             height: 400,
             cropping: true
-        }).then(image => {
-            setPhoto(image);
-            setImagePickerImage(Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path);
+        }).then(images => {
+            const newPhotos = images.map(image => ({
+                sourceURL: image.path,
+                mime: image.mime,
+                name: image.filename || `photo.${image.mime.split('/')[1]}`
+            }));
+            setPhotos([...photos, ...newPhotos]);
             setImgErr(false);
         }).catch(error => {
             console.error('Image Picker Error:', error);
@@ -57,23 +83,60 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
         });
     };
 
-    const gelleryImagePicker = () => {
+    const featuredImagePicker = () => {
         ImagePicker.openPicker({
-            multiple: true
-        }).then(images => {
-            setGallery(images);
+            width: 400,
+            height: 400,
+            cropping: true
+        }).then(image => {
+            setFeaturedImage(image);
+            // setImagePickerImage(Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path);
+            setImgErr(false);
+        }).catch(error => {
+            console.error('Image Picker Error:', error);
+            Alert.alert('Error', 'An error occurred while picking the image. Please try again.');
         });
-    }
+    };
 
-    const deleteImage = () => {
-        setPhoto('');
-        setImagePickerImage(null);
+    // const gelleryImagePicker = () => {
+    //     ImagePicker.openPicker({
+    //         multiple: true
+    //     }).then(images => {
+    //         setGallery(images);
+    //     });
+    // }
+
+    // const deleteImage = () => {
+    //     productService.removeGalleryImages(product_id, image_id)
+    //     // setPhotos([]);
+    //     // setIsDeleted(true)
+
+    //     // setImagePickerImage(null);
+    // }
+
+    const deleteImage = (productId, imageId) => {
+        productService.removeGalleryImages(productId, imageId)
+          .then(() => {
+            setPhotos((prevPhotos) => prevPhotos.filter(photo => photo?.id !== imageId));
+            alert('Image Deleted')
+            productService.getProducts();
+            // handle success, e.g., update state to remove the deleted image from the UI
+          })
+          .catch(error => {
+            console.error('Error deleting image:', error);
+            Alert.alert('Error', 'An error occurred while deleting the image. Please try again.');
+          });
+      };
+
+    const deleteFeaturedImage = () => {
+        setFeaturedImage(null);
+        // setImagePickerImage(null);
     }
 
     const updateProductFunc = async (data) => {
         setUptLoad(true)
         try {
-            if (!imagePickerImage) {
+            if (!featuredImage) {
                 setImgErr(true);
                 scrollViewRef.current.scrollTo({ y: 0, animated: true });
                 setTimeout(() => {
@@ -100,27 +163,87 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
                 return;
             }
 
-            if (photo) {
-                data.photo = {
-                    uri: Platform.OS === 'ios' ? photo.path.replace('file://', '') : photo.path,
+            // if (photos.length > 0) {
+            //     if (photos[0].hasOwnProperty('mime')) {
+            //         data.photos = photos.map(photo => (photo.hasOwnProperty('mime') ? {
+            //             uri: Platform.OS === 'ios' ? photo.path.replace('file://', '') : photo.path,
+            //             type: photo.mime,
+            //             name: photo.filename || `photo.${photo.mime.split('/')[1]}`
+            //         } : photo))
+            //     }
+            // }
+
+            if (photos.length > 0) {
+                const newPhotos = photos.filter(photo => photo.hasOwnProperty('mime')).map(photo => ({
+                    uri: Platform.OS === 'ios' ? photo.sourceURL.replace('file://', '') : photo.sourceURL,
                     type: photo.mime,
-                    name: photo.filename || `photo.${photo.mime.split('/')[1]}`
-                };
+                    name: photo.name
+                }));
+                data.photos = newPhotos;
             }
+
+            // if (photos.length > 0) {
+            //     data.photos = photos.map(photo => ({
+            //         uri: Platform.OS === 'ios' ? photo.sourceURL.replace('file://', '') : photo.sourceURL,
+            //         type: photo.mime,
+            //         name: photo.name
+            //     }));
+            // }
+
+            data.photo = {
+                uri: Platform.OS === 'ios' ? featuredImage.path.replace('file://', '') : featuredImage.path,
+                type: featuredImage.mime,
+                name: featuredImage.filename || `featuredImage.${featuredImage.mime.split('/')[1]}`
+            }
+
+            // if (isDeleted) {
+            //     data?.key = updateProduct.media.map(item => `${item.id}`)
+            // }
 
             const formData = new FormData();
             formData.append('_method', 'PUT');
 
+            // for (const key in data) {
+            //     if (data.hasOwnProperty(key)) {
+            //         if (key === 'photos') {
+            //             data[key].forEach((photo, index) => {
+            //                 formData.append(`gallery[${index}]`, photo);
+            //             });
+
+            //         }
+            //         // else if ( key === 'key') {
+            //         //     data[key].forEach((photo, index) => {
+            //         //         formData.append(`key[${index}]`, photo);
+            //         //     });
+            //         // }
+
+            //         else {
+            //             formData.append(key, data[key]);
+            //         }
+            //     }
+            // }
             for (const key in data) {
                 if (data.hasOwnProperty(key)) {
-                    formData.append(key, data[key]);
+                    if (key === 'photos') {
+                        data[key].forEach((photo, index) => {
+                            formData.append(`gallery[${index}]`, {
+                                uri: photo.uri,
+                                type: photo.type,
+                                name: photo.name
+                            });
+                        });
+                    } else {
+                        formData.append(key, data[key]);
+                    }
                 }
             }
 
             await productService.updateProduct(updateProduct?.id, formData)
                 .then(() => {
                     reset();
-                    setImagePickerImage(null);
+                    // setImagePickerImage(null);
+                    setPhotos([])
+                    setFeaturedImage(null)
                     productService.getProducts();
                     toggleUpdateModal(0);
                     successToast("Product Edited")
@@ -164,8 +287,32 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
             setIsFeatured(updateProduct.featured == 1);
             setIsSale(updateProduct.sale == 1);
             setIsFavourites(updateProduct.favourites == 1);
+            console.log('dchbcbdhbc', updateProduct?.media)
+            if (updateProduct.media.length > 0) {
+                const mediaImages = updateProduct.media.map((item) => {
+                    return (
+                        {
+                            sourceURL: `https://free99us.com/storage/${item?.id}/${item?.file_name}`,
+                            type: item?.mine_type,
+                            name: item?.file_name
+                        }
+                    )
+                })
+                //     setPhotos(updateProduct.image.map(image => ({
+                //         uri: image,
+                //         type: 'image/jpeg',
+                //         name: image.split('/').pop()
+                //     })));
+                setPhotos(mediaImages)
+            }
 
-            if (updateProduct.image) setImagePickerImage(updateProduct.image);
+            setFeaturedImage(
+                {
+                    path: updateProduct.image,
+                    mime: 'image/jpeg',
+                    name: updateProduct.image.split('/').pop()
+                }
+            )
         }
     }, [updateProduct]);
 
@@ -182,17 +329,74 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
                             <TouchableOpacity onPress={() => toggleUpdateModal(0)} style={{ padding: 10 }}>
                                 <FontAwesomeIcon icon={faChevronLeft} size={generalFontSize} color={whiteColor} />
                             </TouchableOpacity>
-                            <Text style={[GlobalStyle.secMainHeading]}>Upload Images</Text>
+                            <Text style={[GlobalStyle.secMainHeading]}>Upload Featured Image</Text>
+                        </View>
+
+                        {/* <View style={[GlobalStyle.row, GlobalStyle.aic, { justifyContent: 'space-between' }]}>
+                            <Text style={[GlobalStyle.secMainHeading]}>Upload Featured Image</Text>
+                        </View> */}
+
+                        <View style={[GlobalStyle.card, { marginTop: 10 }]}>
+                            <ImageBackground
+                                imageStyle={{ resizeMode: 'cover', borderRadius: 10, borderWidth: 1, borderColor: textColor }}
+                                style={{
+                                    width: '100%',
+                                    borderRadius: 10,
+                                    // objectFit: 'cover',
+                                    height: windowWidth / 1.75,
+                                    // borderWidth: 1,
+                                    // borderColor: textColor
+                                }} source={{ uri: featuredImage ? featuredImage?.path : 'https://t4.ftcdn.net/jpg/02/51/95/53/360_F_251955356_FAQH0U1y1TZw3ZcdPGybwUkH90a3VAhb.jpg' }}>
+                                <View style={{
+                                    marginTop: 10,
+                                    marginRight: 10,
+                                    alignItems: 'flex-end',
+                                }}>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            deleteFeaturedImage()
+                                        }}
+                                    >
+                                        <Image style={{ height: 30, width: 30, resizeMode: 'contain', tintColor: 'red', backgroundColor: 'white', borderRadius: 15 }} source={require('./../../../../assets/images/delete.png')} />
+                                    </TouchableOpacity>
+                                </View>
+                            </ImageBackground>
+                            <View style={[GlobalStyle.row, GlobalStyle.aic, { gap: 10 }]}>
+                                {/* <TouchableOpacity
+                                    style={[GlobalStyle.themeBtn, { marginTop: 30, flex: 1 }]}
+                                    onPress={()=>{
+                                        deleteFeaturedImage()
+                                    }}
+                                >
+                                    <Text style={[GlobalStyle.themeBtnText, { fontSize: generalFontSize }]}>Delete image</Text>
+                                </TouchableOpacity> */}
+                                <TouchableOpacity
+                                    style={[GlobalStyle.themeBtn, { marginTop: 30, flex: 1 }]}
+                                    onPress={() => {
+                                        featuredImagePicker()
+                                    }}
+                                >
+                                    <Text style={[GlobalStyle.themeBtnText, { fontSize: generalFontSize }]}>Upload featured image</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        <View style={[GlobalStyle.row, GlobalStyle.aic, { justifyContent: 'space-between', marginTop: 20 }]}>
+                            <Text style={[GlobalStyle.secMainHeading]}>Upload Gallery Images</Text>
                         </View>
 
                         <UploadImage
                             imagePicker={imagePicker}
-                            gelleryImagePicker={gelleryImagePicker}
-                            imagePickerImage={imagePickerImage}
+                            photos={photos}
+                            productId={updateProduct?.id}
+                            imageIds={image_id}
+                            setPhotos={setPhotos}
+                            // gelleryImagePicker={gelleryImagePicker}
+                            // imagePickerImage={imagePickerImage}
                             deleteImage={deleteImage}
                             deleteButton={true}
                         />
-                        {imgErr && <Text style={{ color: 'red', textAlign: 'center', fontSize: generalFontSize, marginTop: 10 }}>Image is Required</Text>}
+                        {/* {imgErr && <Text style={{ color: 'red', textAlign: 'center', fontSize: generalFontSize, marginTop: 10 }}>Image is Required</Text>} */}
                         <View style={[GlobalStyle.row, GlobalStyle.aic, { justifyContent: 'space-between', marginTop: 20 }]}>
                             <Text style={[GlobalStyle.secMainHeading]}>General Information</Text>
                         </View>
@@ -405,8 +609,9 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
                         </View>
 
                         <TouchableOpacity
+                            disabled={!featuredImage}
                             onPress={handleSubmit(updateProductFunc)}
-                            style={[GlobalStyle.themeBtn, { marginTop: 30, width: '100%' }]}
+                            style={[GlobalStyle.themeBtn, { marginTop: 30, width: '100%', backgroundColor: !featuredImage ? 'grey' : themeColor }]}
                         >
                             <Text style={[GlobalStyle.themeBtnText]}>Update product</Text>
                         </TouchableOpacity>

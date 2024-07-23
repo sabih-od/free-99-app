@@ -1,4 +1,4 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert, Image, PermissionsAndroid, Platform } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert, Image, PermissionsAndroid, Platform, Dimensions, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { bgColor, generalFontSize, GlobalStyle, margin, padding, windowWidth, textColor, fontFamily } from '../../../Styles/Theme';
 import UploadImage from '../../../Components/UploadImage/UploadImage';
@@ -15,17 +15,24 @@ import { request, PERMISSIONS, openSettings } from 'react-native-permissions';
 import NotiModal from '../../../Components/NotiModal/NotiModal';
 import { errorToast } from '../../../Utils/toast';
 import StripePayment from '../../../Components/Payment/StripePayment';
+import { useFocusEffect } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 const VendorAddProduct = ({ navigation }) => {
+    const [load, setLoad] = useState(false);
     const authData = useSelector((state) => state.auth.data);
     const category = useSelector((state) => state.shop.category);
     const loading = useSelector((state) => state.product.loading);
-    const [photo, setPhoto] = useState('');
-    const [gallery, setGallery] = useState([]);
+    const [photos, setPhotos] = useState([]);
+    const [featuredImage, setFeaturedImage] = useState(null)
+    // const [gallery, setGallery] = useState([]);
     const [_category, _setCategory] = useState([]);
     const [cat, setCat] = useState('');
     const [imagePickerImage, setImagePickerImage] = useState(null);
     const stripePaymentRef = useRef();
+    const [featured, setFeatured] = useState(false);
+    const [sale, setSale] = useState(false);
+    const [favourites, setFavourites] = useState(false);
 
     const { control, handleSubmit, formState: { errors }, setValue, reset } = useForm();
 
@@ -91,31 +98,52 @@ const VendorAddProduct = ({ navigation }) => {
 
     const imagePicker = () => {
         ImagePicker.openPicker({
+            multiple: true,
             mediaType: 'photo',
             forceJpg: true,
             width: 400,
             height: 400,
             compressImageMaxWidth: 400,
             compressImageMaxHeight: 400,
-            includeBase64: true,
+            // includeBase64: true,
+            cropping: true
+        }).then(images => {
+            setPhotos(images);
+            // setImagePickerImage(Platform.OS === 'ios' ? images.path.replace('file://', '') : images.path);
+        });
+    };
+
+    const featuredImagePicker = () => {
+        ImagePicker.openPicker({
+            mediaType: 'photo',
+            forceJpg: true,
+            width: 400,
+            height: 400,
+            compressImageMaxWidth: 400,
+            compressImageMaxHeight: 400,
+            // includeBase64: true,
             cropping: true
         }).then(image => {
-            setPhoto(image);
-            setImagePickerImage(Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path);
+            setFeaturedImage(image);
+            // setImagePickerImage(Platform.OS === 'ios' ? images.path.replace('file://', '') : images.path);
         });
     };
 
-    const gelleryImagePicker = () => {
-        ImagePicker.openPicker({
-            multiple: true
-        }).then(images => {
-            setGallery(images);
-        });
-    };
+    // const gelleryImagePicker = () => {
+    //     ImagePicker.openPicker({
+    //         multiple: true
+    //     }).then(images => {
+    //         setGallery(images);
+    //     });
+    // };
 
     const validateData = (data) => {
-        if (!photo) {
-            return errorToast('Please select an image.');
+        // if (photos.length === 0) {
+        //     return errorToast('Please select at least one image.');
+        // }
+
+        if (!featuredImage) {
+            return errorToast('Please select featured image.');
         }
 
         if (data.featured) data.featured = 1; else data.featured = 0;
@@ -130,11 +158,17 @@ const VendorAddProduct = ({ navigation }) => {
             return errorToast('Please enter a stock quantity greater than 0.');
         }
 
-        data.photo = {
+        data.photos = photos.map(photo => ({
             uri: Platform.OS === 'ios' ? photo.path.replace('file://', '') : photo.path,
             type: photo.mime,
             name: photo.filename || `photo.${photo.mime.split('/')[1]}`
-        };
+        }))
+
+        data.photo = {
+            uri: Platform.OS === 'ios' ? featuredImage.path.replace('file://', '') : featuredImage.path,
+            type: featuredImage.mime,
+            name: featuredImage.filename || `featuredImage.${featuredImage.mime.split('/')[1]}`
+        }
 
         return data;
     }
@@ -145,22 +179,36 @@ const VendorAddProduct = ({ navigation }) => {
         const formData = new FormData();
         for (const key in _data) {
             if (_data.hasOwnProperty(key)) {
-                formData.append(key, _data[key]);
+                if (key === 'photos') {
+                    _data[key].forEach((photo, index) => {
+                        // formData.append('photo', photo);
+                        formData.append(`gallery[${index}]`, photo);
+                    });
+                } else {
+                    formData.append(key, _data[key]);
+                }
             }
         }
+
 
         try {
             await productService.createProduct(formData)
                 .then(() => {
                     reset();
-                    setImagePickerImage(null);
+                    // setImagePickerImage(null);
+                    setPhotos([])
+                    setFeaturedImage(null)
+                    setFeatured(false);
+                    setSale(false);
+                    setFavourites(false)
                     productService.getProducts();
                     navigation.navigate('vendorProducts');
                 });
         }
         catch (error) {
-            errorToast("Please Connect your Stripe Wallet");
-            navigation.navigate("vendorWallet");
+            console.log('error', error.response.data)
+            errorToast(error.response.data.message);
+            // navigation.navigate("vendorWallet");
         }
     };
 
@@ -174,13 +222,21 @@ const VendorAddProduct = ({ navigation }) => {
     }
 
     const callback = async (data) => {
+        setLoad(!load)
         console.log('callback data', data);
 
         const _data = validateData(data?.data);
         const formData = new FormData();
         for (const key in _data) {
             if (_data.hasOwnProperty(key)) {
-                formData.append(key, _data[key]);
+                if (key === 'photos') {
+                    _data[key].forEach((photo, index) => {
+                        // formData.append('photo', photo);
+                        formData.append(`gallery[${index}]`, photo);
+                    });
+                } else {
+                    formData.append(key, _data[key]);
+                }
             }
         }
 
@@ -190,14 +246,21 @@ const VendorAddProduct = ({ navigation }) => {
             await productService.createProduct(formData)
                 .then(() => {
                     reset();
-                    setImagePickerImage(null);
+                    // setImagePickerImage(null);
+                    setPhotos([])
+                    setFeaturedImage(null)
+                    setFeatured(false);
+                    setSale(false);
+                    setFavourites(false)
                     productService.getProducts();
+                    setLoad(!load)
                     navigation.navigate('vendorProducts');
                 });
         }
         catch (error) {
-            errorToast("Please Connect your Stripe Wallet");
-            navigation.navigate("vendorWallet");
+            console.log('error', error)
+            errorToast(error.response.data.message);
+            // navigation.navigate("vendorWallet");
         }
     }
 
@@ -219,6 +282,21 @@ const VendorAddProduct = ({ navigation }) => {
         }));
     }, [category]);
 
+    useEffect(() => {
+        reset(); // Reset form state
+        setFeatured(false);
+        setSale(false);
+        setFavourites(false);
+    }, [reset]);
+
+    // useFocusEffect(
+    //     React.useCallback(() => {
+    //         setFeatured(false);
+    //         setSale(false);
+    //         setFavourites(false)
+    //     }, [])
+    // );
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: bgColor }}>
             <NotiModal
@@ -226,244 +304,300 @@ const VendorAddProduct = ({ navigation }) => {
                 title={"Loading"}
             />
             <ScrollView>
-                <View style={[GlobalStyle.container, { paddingTop: 30, paddingBottom: 50 }]}>
-                    <View style={[GlobalStyle.row, GlobalStyle.aic, { justifyContent: 'space-between' }]}>
-                        <Text style={[GlobalStyle.secMainHeading]}>Upload Images</Text>
-                    </View>
+                {load ? (<View style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}>
+                    <ActivityIndicator size="large" color={themeColor} />
+                </View>) : (
+                    <>
+                        <View style={[GlobalStyle.container, { paddingTop: 30, paddingBottom: 50 }]}>
 
-                    <UploadImage
-                        imagePicker={requestGalleryPermission}
-                        gelleryImagePicker={gelleryImagePicker}
-                        imagePickerImage={imagePickerImage}
-                        photo={photo}
-                        gallery={gallery}
-                    />
+                            <View style={[GlobalStyle.row, GlobalStyle.aic, { justifyContent: 'space-between' }]}>
+                                <Text style={[GlobalStyle.secMainHeading]}>Upload Featured Image</Text>
+                            </View>
 
-                    <View style={[GlobalStyle.row, GlobalStyle.aic, { justifyContent: 'space-between', marginTop: 30 }]}>
-                        <Text style={[GlobalStyle.secMainHeading]}>General Information</Text>
-                    </View>
-                    <View style={[GlobalStyle.card, { marginTop: 10 }]}>
-                        <View style={[GlobalStyle.inputCont, { width: '100%' }]}>
-                            <Text style={GlobalStyle.inputLabel}>Product Name</Text>
-                            <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
-                                <Controller
-                                    control={control}
-                                    rules={{ required: 'Product Name is required' }}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextInput
-                                            style={GlobalStyle.input}
-                                            placeholder='Product Name'
-                                            placeholderTextColor={'#707070'}
-                                            onBlur={onBlur}
-                                            onChangeText={onChange}
-                                            value={value}
-                                        />
-                                    )}
-                                    name="name"
-                                />
-                                {errors.name && <Text style={{ color: 'red', marginTop: 5 }}>{errors.name.message}</Text>}
+                            <View style={[GlobalStyle.card, { marginTop: 10 }]}>
+                                <Image style={{
+                                    width: '100%',
+                                    borderRadius: 10,
+                                    objectFit: 'cover',
+                                    height: windowWidth / 1.75,
+                                    borderWidth: 1,
+                                    borderColor: textColor
+                                }} source={{ uri: featuredImage ? featuredImage?.path : 'https://t4.ftcdn.net/jpg/02/51/95/53/360_F_251955356_FAQH0U1y1TZw3ZcdPGybwUkH90a3VAhb.jpg' }} />
+                                <TouchableOpacity
+                                    style={[GlobalStyle.themeBtn, { marginTop: 30, flex: 1, width: Dimensions.get('window').width - 65 }]}
+                                    onPress={() => {
+                                        featuredImagePicker()
+                                    }}
+                                >
+                                    <Text style={[GlobalStyle.themeBtnText, { fontSize: generalFontSize }]}>Upload featured image</Text>
+                                </TouchableOpacity>
                             </View>
-                        </View>
-                        <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
-                            <Text style={GlobalStyle.inputLabel}>Product Description</Text>
-                            <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
-                                <Controller
-                                    control={control}
-                                    rules={{ required: 'Product Description is required' }}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextInput
-                                            textAlignVertical='top'
-                                            style={[GlobalStyle.input, { minHeight: 120, height: 'auto' }]}
-                                            placeholder='Product Description'
-                                            placeholderTextColor={'#707070'}
-                                            onBlur={onBlur}
-                                            onChangeText={onChange}
-                                            value={value}
-                                            multiline
-                                        />
-                                    )}
-                                    name="description"
-                                />
-                                {errors.description && <Text style={{ color: 'red', marginTop: 5 }}>{errors.description.message}</Text>}
+
+                            <View style={[GlobalStyle.row, GlobalStyle.aic, { justifyContent: 'space-between', marginTop: 20 }]}>
+                                <Text style={[GlobalStyle.secMainHeading]}>Upload Gallery Images</Text>
                             </View>
-                        </View>
-                        <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
-                            <Text style={GlobalStyle.inputLabel}>Select Category</Text>
-                            <View style={[GlobalStyle.inputContainer, { marginTop: 0 }]}>
-                                <Controller
-                                    control={control}
-                                    rules={{ required: 'Category is required' }}
-                                    render={({ field: { onChange, value } }) => (
-                                        <Dropdown
-                                            style={GlobalStyle.input}
-                                            placeholderStyle={{ color: '#707070' }}
-                                            selectedTextStyle={{ color: '#000' }}
-                                            inputSearchStyle={{ color: '#000' }}
-                                            data={_category}
-                                            maxHeight={300}
-                                            labelField="label"
-                                            valueField="value"
-                                            placeholder="Select item"
-                                            value={value}
-                                            onChange={item => {
-                                                setCat(item.value);
-                                                onChange(item.value);
+
+                            <UploadImage
+                                imagePicker={requestGalleryPermission}
+                                // gelleryImagePicker={gelleryImagePicker}
+                                imagePickerImages={photos}
+                                photos={photos}
+                            // gallery={gallery}
+                            />
+
+                            <View style={[GlobalStyle.row, GlobalStyle.aic, { justifyContent: 'space-between', marginTop: 30 }]}>
+                                <Text style={[GlobalStyle.secMainHeading]}>General Information</Text>
+                            </View>
+                            <View style={[GlobalStyle.card, { marginTop: 10 }]}>
+                                <View style={[GlobalStyle.inputCont, { width: '100%' }]}>
+                                    <Text style={GlobalStyle.inputLabel}>Product Name</Text>
+                                    <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
+                                        <Controller
+                                            control={control}
+                                            rules={{ required: 'Product Name is required' }}
+                                            render={({ field: { onChange, onBlur, value } }) => (
+                                                <TextInput
+                                                    style={GlobalStyle.input}
+                                                    placeholder='Enter Product Name'
+                                                    placeholderTextColor={'#707070'}
+                                                    onBlur={onBlur}
+                                                    onChangeText={onChange}
+                                                    value={value}
+                                                />
+                                            )}
+                                            name="name"
+                                        />
+                                        {errors.name && <Text style={{ color: 'red', marginTop: 5 }}>{errors.name.message}</Text>}
+                                    </View>
+                                </View>
+                                <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
+                                    <Text style={GlobalStyle.inputLabel}>Product Description</Text>
+                                    <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
+                                        <Controller
+                                            control={control}
+                                            rules={{ required: 'Product Description is required' }}
+                                            render={({ field: { onChange, onBlur, value } }) => (
+                                                <TextInput
+                                                    textAlignVertical='top'
+                                                    style={[GlobalStyle.input, { minHeight: 120, height: 'auto' }]}
+                                                    placeholder='Enter Product Description'
+                                                    placeholderTextColor={'#707070'}
+                                                    onBlur={onBlur}
+                                                    onChangeText={onChange}
+                                                    value={value}
+                                                    multiline
+                                                />
+                                            )}
+                                            name="description"
+                                        />
+                                        {errors.description && <Text style={{ color: 'red', marginTop: 5 }}>{errors.description.message}</Text>}
+                                    </View>
+                                </View>
+                                <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
+                                    <Text style={GlobalStyle.inputLabel}>Select Category</Text>
+                                    <View style={[GlobalStyle.inputContainer, { marginTop: 0 }]}>
+                                        <Controller
+                                            control={control}
+                                            rules={{ required: 'Category is required' }}
+                                            render={({ field: { onChange, value } }) => (
+                                                <Dropdown
+                                                    style={GlobalStyle.input}
+                                                    placeholderStyle={{ color: '#707070' }}
+                                                    selectedTextStyle={{ color: '#000' }}
+                                                    inputSearchStyle={{ color: '#000' }}
+                                                    data={_category}
+                                                    maxHeight={300}
+                                                    labelField="label"
+                                                    valueField="value"
+                                                    placeholder="Select item"
+                                                    value={value}
+                                                    onChange={item => {
+                                                        setCat(item.value);
+                                                        onChange(item.value);
+                                                    }}
+                                                    renderItem={renderItem}
+                                                />
+                                            )}
+                                            name="category_id"
+                                        />
+                                        {errors.category_id && <Text style={{ color: 'red', marginTop: 5 }}>{errors.category_id.message}</Text>}
+                                    </View>
+                                </View>
+                            </View>
+
+                            <View style={[GlobalStyle.row, GlobalStyle.aic, { justifyContent: 'space-between', marginTop: 30 }]}>
+                                <Text style={[GlobalStyle.secMainHeading]}>Pricing and Stock</Text>
+                            </View>
+                            <View style={[GlobalStyle.card, { marginTop: 10 }]}>
+                                <View style={[GlobalStyle.inputCont, { width: '100%' }]}>
+                                    <Text style={GlobalStyle.inputLabel}>Price</Text>
+                                    <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
+                                        <Controller
+                                            control={control}
+                                            rules={{
+                                                required: 'Price is required', min: {
+                                                    value: 1,
+                                                    message: 'Price Should be minimum of 1'
+                                                }
                                             }}
-                                            renderItem={renderItem}
+                                            render={({ field: { onChange, onBlur, value } }) => (
+                                                <TextInput
+                                                    style={GlobalStyle.input}
+                                                    placeholder='Enter Price'
+                                                    placeholderTextColor={'#707070'}
+                                                    keyboardType='numeric'
+                                                    onBlur={onBlur}
+                                                    onChangeText={onChange}
+                                                    value={value}
+                                                />
+                                            )}
+                                            name="price"
                                         />
-                                    )}
-                                    name="category_id"
-                                />
-                                {errors.category_id && <Text style={{ color: 'red', marginTop: 5 }}>{errors.category_id.message}</Text>}
-                            </View>
-                        </View>
-                    </View>
+                                        {errors.price && <Text style={{ color: 'red', marginTop: 5 }}>{errors.price.message}</Text>}
+                                    </View>
+                                </View>
+                                <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
+                                    <Text style={GlobalStyle.inputLabel}>Stock</Text>
+                                    <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
+                                        <Controller
+                                            control={control}
+                                            rules={{
+                                                required: 'Stock quantity is required', min: {
+                                                    value: 1,
+                                                    message: 'Quantity Should be minimum of 1'
+                                                }
+                                            }}
+                                            render={({ field: { onChange, onBlur, value } }) => (
+                                                <TextInput
+                                                    style={GlobalStyle.input}
+                                                    placeholder='Enter Stock quantity'
+                                                    placeholderTextColor={'#707070'}
+                                                    keyboardType='numeric'
+                                                    onBlur={onBlur}
+                                                    onChangeText={onChange}
+                                                    value={value}
+                                                />
+                                            )}
+                                            name="stock_quantity"
+                                        />
+                                        {errors.stock_quantity && <Text style={{ color: 'red', marginTop: 5 }}>{errors.stock_quantity.message}</Text>}
+                                    </View>
+                                </View>
+                                <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
+                                    <Text style={GlobalStyle.inputLabel}>Brand</Text>
+                                    <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
+                                        <Controller
+                                            control={control}
+                                            // rules={{ required: 'Brand is required' }}
+                                            render={({ field: { onChange, onBlur, value } }) => (
+                                                <TextInput
+                                                    style={GlobalStyle.input}
+                                                    placeholder='Enter Brand'
+                                                    placeholderTextColor={'#707070'}
+                                                    onBlur={onBlur}
+                                                    onChangeText={onChange}
+                                                    value={value}
+                                                />
+                                            )}
+                                            name="brand"
+                                        />
+                                        {errors.brand && <Text style={{ color: 'red', marginTop: 5 }}>{errors.brand.message}</Text>}
+                                    </View>
+                                </View>
 
-                    <View style={[GlobalStyle.row, GlobalStyle.aic, { justifyContent: 'space-between', marginTop: 30 }]}>
-                        <Text style={[GlobalStyle.secMainHeading]}>Pricing and Stock</Text>
-                    </View>
-                    <View style={[GlobalStyle.card, { marginTop: 10 }]}>
-                        <View style={[GlobalStyle.inputCont, { width: '100%' }]}>
-                            <Text style={GlobalStyle.inputLabel}>Price</Text>
-                            <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
-                                <Controller
-                                    control={control}
-                                    rules={{
-                                        required: 'Price is required', min: {
-                                            value: 1,
-                                            message: 'Price Should be minimum of 1'
+                                <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
+                                    <BouncyCheckbox
+                                        size={25}
+                                        fillColor={themeColor}
+                                        unFillColor="#FFFFFF"
+                                        text="Is Featured"
+                                        iconStyle={{ borderColor: themeColor }}
+                                        innerIconStyle={{ borderWidth: 2 }}
+                                        textStyle={{ fontFamily: "FreightBigPro-Bold" }}
+                                        onPress={(isChecked) => { setValue('featured', isChecked); setFeatured(isChecked); }}
+                                        style={{ marginBottom: 15 }}
+                                        isChecked={featured}
+                                    />
+
+                                    <BouncyCheckbox
+                                        size={25}
+                                        fillColor={themeColor}
+                                        unFillColor="#FFFFFF"
+                                        text="Is Sale"
+                                        iconStyle={{ borderColor: themeColor }}
+                                        innerIconStyle={{ borderWidth: 2 }}
+                                        textStyle={{ fontFamily: "FreightBigPro-Bold" }}
+                                        onPress={(isChecked) => { setValue('sale', isChecked); setSale(isChecked); }}
+                                        style={{ marginBottom: 15 }}
+                                        isChecked={sale}
+                                    />
+
+                                    <BouncyCheckbox
+                                        size={25}
+                                        fillColor={themeColor}
+                                        unFillColor="#FFFFFF"
+                                        text="Is Favourites"
+                                        iconStyle={{ borderColor: themeColor }}
+                                        innerIconStyle={{ borderWidth: 2 }}
+                                        textStyle={{ fontFamily: "FreightBigPro-Bold" }}
+                                        onPress={(isChecked) => { setValue('favourites', isChecked); setFavourites(isChecked); }}
+                                        style={{ marginBottom: 15 }}
+                                        isChecked={favourites}
+                                    />
+                                </View>
+                            </View>
+
+                            {
+                                (authData?.user_subscription?.subscription?.limitation === 'unlimited') &&
+                                <TouchableOpacity
+                                    disabled={!featuredImage}
+                                    onPress={() => {
+                                        if (!authData?.stripe_account_id) {
+                                            errorToast('Please Connect your Stripe Wallet')
+                                            navigation.navigate('vendorWallet')
+                                            return
                                         }
-                                    }}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextInput
-                                            style={GlobalStyle.input}
-                                            placeholder='Price'
-                                            placeholderTextColor={'#707070'}
-                                            keyboardType='numeric'
-                                            onBlur={onBlur}
-                                            onChangeText={onChange}
-                                            value={value}
-                                        />
-                                    )}
-                                    name="price"
-                                />
-                                {errors.price && <Text style={{ color: 'red', marginTop: 5 }}>{errors.price.message}</Text>}
-                            </View>
-                        </View>
-                        <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
-                            <Text style={GlobalStyle.inputLabel}>Stock</Text>
-                            <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
-                                <Controller
-                                    control={control}
-                                    rules={{
-                                        required: 'Stock quantity is required', min: {
-                                            value: 1,
-                                            message: 'Quantity Should be minimum of 1'
+                                        handleSubmit(createProduct)()
+                                    }
+                                    }
+                                    style={[GlobalStyle.themeBtn, { marginTop: 30, backgroundColor: !featuredImage ? 'grey' : themeColor }]}
+                                >
+                                    <Text style={[GlobalStyle.themeBtnText]}>Add product</Text>
+                                </TouchableOpacity>
+                            }
+
+                            {
+                                (authData?.user_subscription?.subscription?.limitation === 'limited') &&
+                                <TouchableOpacity
+                                    disabled={!featuredImage}
+                                    onPress={() => {
+                                        if (!authData?.stripe_account_id) {
+                                            errorToast('Please Connect your Stripe Wallet')
+                                            navigation.navigate('vendorWallet')
+                                            return
                                         }
-                                    }}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextInput
-                                            style={GlobalStyle.input}
-                                            placeholder='Stock quantity'
-                                            placeholderTextColor={'#707070'}
-                                            keyboardType='numeric'
-                                            onBlur={onBlur}
-                                            onChangeText={onChange}
-                                            value={value}
-                                        />
-                                    )}
-                                    name="stock_quantity"
-                                />
-                                {errors.stock_quantity && <Text style={{ color: 'red', marginTop: 5 }}>{errors.stock_quantity.message}</Text>}
+                                        handleSubmit(pay)()
+                                    }
+                                    }
+                                    style={[GlobalStyle.themeBtn, { marginTop: 30, backgroundColor: !featuredImage ? 'grey' : themeColor }]}
+                                >
+                                    <Text style={[GlobalStyle.themeBtnText]}>Pay</Text>
+                                </TouchableOpacity>
+                            }
+                        </View>
+
+                        {
+                            (authData?.user_subscription?.subscription?.price_per_product > 0) &&
+                            <View>
+                                <StripePayment amount={parseInt(authData?.user_subscription?.subscription?.price_per_product)} ref={stripePaymentRef} callback={callback} />
                             </View>
-                        </View>
-                        <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
-                            <Text style={GlobalStyle.inputLabel}>Brand</Text>
-                            <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
-                                <Controller
-                                    control={control}
-                                    // rules={{ required: 'Brand is required' }}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextInput
-                                            style={GlobalStyle.input}
-                                            placeholder='Brand'
-                                            placeholderTextColor={'#707070'}
-                                            onBlur={onBlur}
-                                            onChangeText={onChange}
-                                            value={value}
-                                        />
-                                    )}
-                                    name="brand"
-                                />
-                                {errors.brand && <Text style={{ color: 'red', marginTop: 5 }}>{errors.brand.message}</Text>}
-                            </View>
-                        </View>
-
-                        <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
-                            <BouncyCheckbox
-                                size={25}
-                                fillColor={themeColor}
-                                unFillColor="#FFFFFF"
-                                text="Is Featured"
-                                iconStyle={{ borderColor: themeColor }}
-                                innerIconStyle={{ borderWidth: 2 }}
-                                textStyle={{ fontFamily: "FreightBigPro-Bold" }}
-                                onPress={(isChecked) => { setValue('featured', isChecked) }}
-                                style={{ marginBottom: 15 }}
-                            />
-
-                            <BouncyCheckbox
-                                size={25}
-                                fillColor={themeColor}
-                                unFillColor="#FFFFFF"
-                                text="Is Sale"
-                                iconStyle={{ borderColor: themeColor }}
-                                innerIconStyle={{ borderWidth: 2 }}
-                                textStyle={{ fontFamily: "FreightBigPro-Bold" }}
-                                onPress={(isChecked) => { setValue('sale', isChecked) }}
-                                style={{ marginBottom: 15 }}
-                            />
-
-                            <BouncyCheckbox
-                                size={25}
-                                fillColor={themeColor}
-                                unFillColor="#FFFFFF"
-                                text="Is Favourites"
-                                iconStyle={{ borderColor: themeColor }}
-                                innerIconStyle={{ borderWidth: 2 }}
-                                textStyle={{ fontFamily: "FreightBigPro-Bold" }}
-                                onPress={(isChecked) => { setValue('favourites', isChecked) }}
-                                style={{ marginBottom: 15 }}
-                            />
-                        </View>
-                    </View>
-
-                    {
-                        (authData?.user_subscription?.subscription?.limitation === 'unlimited') &&
-                        <TouchableOpacity
-                            onPress={handleSubmit(createProduct)}
-                            style={[GlobalStyle.themeBtn, { marginTop: 30 }]}
-                        >
-                            <Text style={[GlobalStyle.themeBtnText]}>Add product</Text>
-                        </TouchableOpacity>
-                    }
-
-                    {
-                        (authData?.user_subscription?.subscription?.limitation === 'limited') &&
-                        <TouchableOpacity
-                            onPress={handleSubmit(pay)}
-                            style={[GlobalStyle.themeBtn, { marginTop: 30 }]}
-                        >
-                            <Text style={[GlobalStyle.themeBtnText]}>Pay</Text>
-                        </TouchableOpacity>
-                    }
-                </View>
-
-                {
-                    (authData?.user_subscription?.subscription?.price_per_product > 0) &&
-                    <View>
-                        <StripePayment amount={parseInt(authData?.user_subscription?.subscription?.price_per_product)} ref={stripePaymentRef} callback={callback} />
-                    </View>
+                        }
+                    </>
+                )
                 }
 
             </ScrollView>

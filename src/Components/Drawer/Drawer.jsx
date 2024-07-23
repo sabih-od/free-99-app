@@ -23,10 +23,10 @@ const navigations = [
         name: 'contact us',
         url: 'contact'
     },
-    {
-        name: 'user settings',
-        url: 'settings'
-    },
+    // {
+    //     name: 'user settings',
+    //     url: 'settings'
+    // },
 ]
 
 const vendorNavigations = [
@@ -127,7 +127,7 @@ const DrawerComp = ({ isCustomer }) => {
             <View style={styles.overlayModal}>
                 {isVendor && (
                     <TouchableOpacity
-                        onPress={() => { navigation.reset({ index: 0, routes: [{ name: 'dashboard' }] }) }}
+                        onPress={() => {isCustomer ? navigation.reset({ index: 0, routes: [{ name: 'vendor' }] }) : navigation.reset({ index: 0, routes: [{ name: 'dashboard' }] }) }}
                         style={[GlobalStyle.themeBtn, { width: '100%' }]}
                     >
                         <Text style={GlobalStyle.themeBtnText}>

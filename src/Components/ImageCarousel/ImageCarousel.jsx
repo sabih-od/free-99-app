@@ -39,11 +39,11 @@ const ImageCarousel = () => {
                 renderItem={({ index, item }) => (
                     <TouchableHighlight
                         onPress={() => navigation.navigate('shop')}
-                        style={styles.imgContainer}
+                        style={[styles.imgContainer, {paddingHorizontal: 10, borderRadius: 5}]}
                     >
                         <Image
                             source={item.image}
-                            style={styles.imageStyle}
+                            style={[styles.imageStyle, {borderRadius: 5}]}
                         />
                     </TouchableHighlight>
                 )}

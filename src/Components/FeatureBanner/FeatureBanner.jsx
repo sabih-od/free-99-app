@@ -13,9 +13,9 @@ const FeatureBanner = ({ img, title }) => {
             <Image style={styles.bannerImg} source={img} />
             <View style={styles.content}>
                 <Text style={styles.bannerHeading}>{title}</Text>
-                <TouchableOpacity>
+                <View>
                     <Text style={styles.buttonText}>Shop now</Text>
-                </TouchableOpacity>
+                </View>
             </View>
         </TouchableOpacity>
     )

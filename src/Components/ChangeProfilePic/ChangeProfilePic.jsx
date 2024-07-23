@@ -1,6 +1,6 @@
 // Add these imports at the beginning of your file
 import React, { useEffect, useState } from 'react';
-import { Platform, StyleSheet, Text, TouchableOpacity, View, PermissionsAndroid } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View, PermissionsAndroid, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import { faCamera, faFile } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';

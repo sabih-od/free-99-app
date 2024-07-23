@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: isIpad ? generalFontSize + 10 : 18,
         textAlign: 'left',
-        color: '#828282',
+        color: '#686868',
     },
     placeholderStyle: {
         ...fontFamily('regular'),
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: isIpad ? generalFontSize + 10 : 18,
         textAlign: 'left',
-        color: '#828282',
+        color: '#686868',
     },
     selectedTextStyle: {
         ...fontFamily('regular'),
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: isIpad ? generalFontSize + 10 : 18,
         textAlign: 'left',
-        color: '#828282',
+        color: '#686868',
     },
     inputSearchStyle: {
         height: 40,

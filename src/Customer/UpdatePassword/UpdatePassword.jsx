@@ -64,7 +64,7 @@ const UpdatePassword = ({ navigation, route }) => {
                         <View style={GlobalStyle.inputContainer}>
                             <TextInput
                                 style={GlobalStyle.input}
-                                placeholder='Current Password'
+                                placeholder='Enter Current Password'
                                 placeholderTextColor={'#707070'}
                                 keyboardType='default'
                                 secureTextEntry={passwordVisible}
@@ -90,7 +90,7 @@ const UpdatePassword = ({ navigation, route }) => {
                         <View style={GlobalStyle.inputContainer}>
                             <TextInput
                                 style={GlobalStyle.input}
-                                placeholder='New Password'
+                                placeholder='Enter New Password'
                                 placeholderTextColor={'#707070'}
                                 keyboardType='default'
                                 secureTextEntry={passwordVisible}
@@ -120,7 +120,7 @@ const UpdatePassword = ({ navigation, route }) => {
                         <View style={GlobalStyle.inputContainer}>
                             <TextInput
                                 style={GlobalStyle.input}
-                                placeholder='Confirm Password'
+                                placeholder='Enter Confirm Password'
                                 placeholderTextColor={'#707070'}
                                 keyboardType='default'
                                 secureTextEntry={passwordVisible}

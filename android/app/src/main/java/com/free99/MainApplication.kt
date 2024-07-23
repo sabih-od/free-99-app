@@ -1,4 +1,4 @@
-package com.free99
+package com.app.free99
 
 import android.app.Application
 import com.facebook.react.PackageList

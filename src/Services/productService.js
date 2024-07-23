@@ -167,4 +167,16 @@ export const productService = {
             store.dispatch(setLoading(false));
         }
     },
+        removeGalleryImages: async (productId, imageId) => {
+            store.dispatch(setLoading(true));
+            try {
+                const response = await apiClient.delete(`/product/gallery-image/${productId}/${imageId}`);
+                return response.data.message;
+            } catch (error) {
+                console.error('Error removing gallery image:', error);
+                throw error;
+            } finally {
+                store.dispatch(setLoading(false));
+            }
+        }
 };

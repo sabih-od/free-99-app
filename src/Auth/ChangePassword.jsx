@@ -51,7 +51,7 @@ const ChangePassword = ({ navigation, route }) => {
                     <View style={GlobalStyle.inputContainer}>
                         <TextInput
                             style={GlobalStyle.input}
-                            placeholder='Confirmation Code'
+                            placeholder='Enter Confirmation Code'
                             placeholderTextColor={'#707070'}
                             keyboardType='default'
                             autoCapitalize='none'
@@ -84,7 +84,7 @@ const ChangePassword = ({ navigation, route }) => {
                         <View style={GlobalStyle.inputContainer}>
                             <TextInput
                                 style={GlobalStyle.input}
-                                placeholder='New Password'
+                                placeholder='Enter New Password'
                                 placeholderTextColor={'#707070'}
                                 keyboardType='default'
                                 secureTextEntry={passwordVisible}
@@ -114,7 +114,7 @@ const ChangePassword = ({ navigation, route }) => {
                         <View style={GlobalStyle.inputContainer}>
                             <TextInput
                                 style={GlobalStyle.input}
-                                placeholder='Confirm Password'
+                                placeholder='Enter Confirm Password'
                                 placeholderTextColor={'#707070'}
                                 keyboardType='default'
                                 secureTextEntry={passwordVisible}

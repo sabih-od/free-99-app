@@ -37,7 +37,7 @@ const Login = ({ navigation }) => {
     const onSubmit = async (data) => {
         try {
             const response = await authService.login(data);
-            navigation.replace("dashboard")
+            navigation.reset({ index: 0, routes: [{ name: 'dashboard' }] })
         } catch (error) {
             console.error('Login failed:', error);
         }
@@ -87,7 +87,7 @@ const Login = ({ navigation }) => {
                                 <View style={GlobalStyle.inputContainer}>
                                     <TextInput
                                         style={GlobalStyle.input}
-                                        placeholder='Email Address'
+                                        placeholder='Enter Email Address'
                                         placeholderTextColor={'#707070'}
                                         keyboardType='email-address'
                                         autoCapitalize='none'
@@ -113,7 +113,7 @@ const Login = ({ navigation }) => {
                                 <View style={GlobalStyle.inputContainer}>
                                     <TextInput
                                         style={GlobalStyle.input}
-                                        placeholder='Password'
+                                        placeholder='Enter Password'
                                         placeholderTextColor={'#707070'}
                                         keyboardType='default'
                                         secureTextEntry={passwordVisible}

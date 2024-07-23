@@ -7,12 +7,14 @@ import { useSelector } from 'react-redux';
 import NotiModal from '../../../Components/NotiModal/NotiModal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSearch, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import HomeProducts from '../../../Components/HomeProducts/HomeProducts';
 
 const Shop = () => {
   const loading = useSelector((state) => state.auth.loading);
   const searchInput = useRef();
   const [isProductLoading, setIsLoading] = useState(loading);
   const [searchValue, setSearchValue] = useState('');
+  const [showHomeProducts, setShowHomeProducts] = useState(true);
 
   useEffect(() => {
     setIsLoading(loading);
@@ -23,6 +25,10 @@ const Shop = () => {
     if (searchInput.current) {
       searchInput.current.clear();
     }
+  };
+
+  const handleCategoryPress = () => {
+    setShowHomeProducts(false);
   };
 
   return (
@@ -54,7 +60,7 @@ const Shop = () => {
       </TouchableOpacity> */}
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={[GlobalStyle.container, padding('top', 15)]}>
-          <Categories mainTitle={"Categories"} />
+          <Categories mainTitle={"Categories"} onCategoryPress={handleCategoryPress} />
           {isProductLoading ? (
             <NotiModal
               canHide
@@ -63,7 +69,11 @@ const Shop = () => {
             />
           ) : (
             <View style={margin("top", 10)}>
-              <Products />
+              {showHomeProducts ? (
+                <HomeProducts />
+              ) : (
+                <Products />
+              )}
             </View>
           )}
         </View>

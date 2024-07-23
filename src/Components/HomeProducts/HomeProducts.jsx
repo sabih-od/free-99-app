@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, View, Image, Dimensions, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
+import { FlatList, StyleSheet, Text, View, ActivityIndicator, Animated } from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { GlobalStyle, isIpad, textColor, whiteColor, windowWidth } from '../../Styles/Theme';
 import Product from '../Product/Product';
@@ -50,22 +50,46 @@ const LoadingSkeleton = () => {
 };
 
 const HomeProducts = () => {
-    const [data, setData] = useState()
-    const pagination = useSelector(state => state.shop.pagination);
-    const navigation = useNavigation()
+    const [data, setData] = useState([]);
+    const [nextPageUrl, setNextPageUrl] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const navigation = useNavigation();
 
-    const fetchOrders = useCallback(async () => {
-        const response = await shopService.getAllCategoriesProducts();
-        setData(response.data.products.data)
-    }, []);
+    const fetchOrders = useCallback(async (url = '/shop/category?page=1') => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            const response = await shopService.getAllCategoriesProducts(url);
+            setData(prevData => [...prevData, ...response.data.products.data]);
+            setNextPageUrl(response.data.products.next_page_url);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }, [loading]);
 
     useEffect(() => {
         fetchOrders();
     }, []);
 
+    const handleLoadMore = () => {
+        if (nextPageUrl) {
+            fetchOrders(nextPageUrl);
+        }
+    };
+
+    const renderFooter = () => {
+        return loading ? (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" />
+            </View>
+        ) : null;
+    };
+
     return (
         <View style={{ flex: 1 }}>
-            {data ? (
+            {data.length ? (
                 <FlatList
                     data={data}
                     showsVerticalScrollIndicator={false}
@@ -83,6 +107,9 @@ const HomeProducts = () => {
                             key={index}
                         />
                     )}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.5}
+                    ListFooterComponent={renderFooter}
                 />
             ) : (
                 <LoadingSkeleton />

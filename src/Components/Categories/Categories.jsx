@@ -5,7 +5,7 @@ import { shopService } from '../../Services/shopService.js';
 import { useSelector } from 'react-redux';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 
-const Categories = ({ catTitle, mainTitle, isVertical }) => {
+const Categories = ({ catTitle, mainTitle, isVertical, onCategoryPress }) => {
     const category = useSelector((state) => state.shop.category)
     const navigation = useNavigation();
 
@@ -39,6 +39,7 @@ const Categories = ({ catTitle, mainTitle, isVertical }) => {
                 numColumns={isVertical ? 3 : 0} // Set numColumns based on isVertical prop
                 renderItem={({ item, index }) => (
                     <TouchableOpacity onPress={() => {
+                        onCategoryPress()
                         activeCategory(item.slug); // Logging current route name on item press
                     }}>
                         <View key={index} style={styles.box}>
