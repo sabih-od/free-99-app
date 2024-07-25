@@ -12,6 +12,7 @@ import { shopService } from '../../Services/shopService';
 import AddReview from '../../Components/AddReview/AddReview';
 import ProductRating from '../../Components/ProductRating/ProductRating';
 import { productService } from '../../Services/productService';
+import ImageViewing from 'react-native-image-viewing';
 
 const LoadingSkeleton = () => {
     const [opacity] = useState(new Animated.Value(0.3));
@@ -84,6 +85,14 @@ const ProductDetail = ({ navigation, route }) => {
     const [prodLoading, setProdLoading] = useState()
     const [wishlistLoading, setWishlistLoading] = useState()
     const cartLoading = useSelector((state) => state.cart.loading)
+
+    const [isVisible, setIsVisible] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const openImage = (index) => {
+        setCurrentIndex(index);
+        setIsVisible(true);
+    };
 
     const fetchProduct = useCallback(async () => {
         setProdLoading((prevFav) => !prevFav);
@@ -223,17 +232,27 @@ const ProductDetail = ({ navigation, route }) => {
                                 data={item?.media}
                                 scrollAnimationDuration={2000}
                                 renderItem={({ item: imgItem, index }) => (
-                                    <ImageBackground
-                                        key={index}
-                                        source={{ uri: imgItem.image }}
-                                        style={[styles.img, { alignItems: 'center', justifyContent: 'center' }]}>
-                                        {disableBtn && (
-                                            <View style={styles.outOfStockOverlay}>
-                                                <Text style={styles.outofstocktext}>Item is out of Stock.</Text>
-                                            </View>
-                                        )}
-                                    </ImageBackground>
+                                    <TouchableOpacity activeOpacity={0.8} onPress={() => openImage(index)}>
+                                        <ImageBackground
+                                            key={index}
+                                            source={{ uri: imgItem.image }}
+                                            style={[styles.img, { alignItems: 'center', justifyContent: 'center' }]}>
+                                            {disableBtn && (
+                                                <View style={styles.outOfStockOverlay}>
+                                                    <Text style={styles.outofstocktext}>Item is out of Stock.</Text>
+                                                </View>
+                                            )}
+                                        </ImageBackground>
+                                    </TouchableOpacity>
                                 )}
+                            />
+                            <ImageViewing
+                                images={item?.media?.map(mediaItem => ({ uri: mediaItem?.image }))}
+                                imageIndex={currentIndex}
+                                visible={isVisible}
+                                onRequestClose={() => setIsVisible(false)}
+                                doubleTapToZoomEnabled={true}
+                                swipeToCloseEnabled={true}
                             />
                         </View>
                         <View style={[GlobalStyle.container, { height: '100%' }]}>

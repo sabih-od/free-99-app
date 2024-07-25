@@ -5,7 +5,7 @@ import { shopService } from '../../Services/shopService.js';
 import { useSelector } from 'react-redux';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 
-const Categories = ({ catTitle, mainTitle, isVertical, onCategoryPress }) => {
+const Categories = ({ catTitle, mainTitle, isVertical, onCategoryPress = () => {} }) => {
     const category = useSelector((state) => state.shop.category)
     const navigation = useNavigation();
 
