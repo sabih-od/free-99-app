@@ -10,7 +10,6 @@ const Product = ({ width, height, item }) => {
   const [disableBtn, setDisableBtn] = useState(false)
   const id = item?.id
   const data = item
-  console.log('itemitem', item)
   useEffect(() => { item?.stock_quantity <= 0 ? setDisableBtn(true) : '' }, [])
   return (
     <>

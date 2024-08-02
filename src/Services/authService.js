@@ -152,7 +152,7 @@ export const authService = {
     store.dispatch(setLoading(true))
     try {
       const { token } = store.getState().auth;
-      const response = await apiClient.delete(`/auth/users/${userId}`, {
+      const response = await apiClient.delete('user/destroy-self', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       successToast(response.data.message);

@@ -1,5 +1,5 @@
-import { ActivityIndicator, Alert, Animated, Dimensions, Image, ImageBackground, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import React, { useEffect, useState, useCallback } from 'react';
+import { ActivityIndicator, Alert, Animated, Dimensions, Image, ImageBackground, Modal, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { bgColor, gap, generalFontSize, GlobalStyle, margin, padding, secondColor, textColor, fontFamily, itemBg, windowWidth, windowHeight, themeColor, whiteColor, blackColor, isIpad } from '../../Styles/Theme';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft, faHeart, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
@@ -13,6 +13,9 @@ import AddReview from '../../Components/AddReview/AddReview';
 import ProductRating from '../../Components/ProductRating/ProductRating';
 import { productService } from '../../Services/productService';
 import ImageViewing from 'react-native-image-viewing';
+import { ImageViewer } from 'react-native-image-zoom-viewer';
+import { ImageGallery } from '@georstat/react-native-image-gallery';
+import { ImageZoom, ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
 
 const LoadingSkeleton = () => {
     const [opacity] = useState(new Animated.Value(0.3));
@@ -88,10 +91,16 @@ const ProductDetail = ({ navigation, route }) => {
 
     const [isVisible, setIsVisible] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const imageZoomRef = useRef(null);
 
     const openImage = (index) => {
         setCurrentIndex(index);
         setIsVisible(true);
+    };
+
+    const closeImageZoom = () => {
+        setIsVisible(false);
+        setCurrentIndex(0);
     };
 
     const fetchProduct = useCallback(async () => {
@@ -207,6 +216,8 @@ const ProductDetail = ({ navigation, route }) => {
         }
     }, [disableBtn, isAuth, navigation]);
 
+    const galleryImages = item?.media[currentIndex]?.image;
+
     return (
         <View style={{ backgroundColor: bgColor, flex: 1 }}>
             {prodLoading ?
@@ -246,14 +257,65 @@ const ProductDetail = ({ navigation, route }) => {
                                     </TouchableOpacity>
                                 )}
                             />
-                            <ImageViewing
-                                images={item?.media?.map(mediaItem => ({ uri: mediaItem?.image }))}
-                                imageIndex={currentIndex}
-                                visible={isVisible}
-                                onRequestClose={() => setIsVisible(false)}
-                                doubleTapToZoomEnabled={true}
-                                swipeToCloseEnabled={true}
-                            />
+                            {isVisible && (
+                                <Modal visible={isVisible} transparent={true} onRequestClose={closeImageZoom}>
+                                    <View style={{
+                                        flex: 1,
+                                        backgroundColor: 'black',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}>
+                                        <ImageZoom
+                                            ref={imageZoomRef}
+                                            uri={galleryImages}
+                                            minScale={0.5}
+                                            maxScale={5}
+                                            doubleTapScale={3}
+                                            minPanPointers={1}
+                                            isDoubleTapEnabled
+                                            onDoubleTap={(zoomType) => {
+                                                console.log('onDoubleTap', zoomType);
+                                                if (zoomType === ZOOM_TYPE.ZOOM_IN) {
+                                                    setTimeout(() => {
+                                                        imageZoomRef.current?.reset();
+                                                    }, 3000);
+                                                }
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                            }}
+                                            resizeMode="contain"
+                                        />
+                                        <TouchableOpacity onPress={closeImageZoom} style={{
+                                            position: 'absolute',
+                                            top: 40,
+                                            right: 20,
+                                            backgroundColor: 'rgba(0,0,0,0.5)',
+                                            borderRadius: 50,
+                                            padding: 10,
+                                        }}>
+                                            <Text style={{
+                                                color: '#fff',
+                                                fontSize: 18,
+                                            }}>Close</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </Modal>
+                            )}
+
+                            {/* {isVisible && (
+                                <ImageViewing
+                                    images={item?.media?.map(mediaItem => ({ uri: mediaItem?.image }))}
+                                    imageIndex={currentIndex}
+                                    visible={isVisible}
+                                    onRequestClose={() => setIsVisible(false)}
+                                    doubleTapToZoomEnabled={true}
+                                    swipeToCloseEnabled={true}
+                                />
+                            )} */}
+
+
                         </View>
                         <View style={[GlobalStyle.container, { height: '100%' }]}>
                             <View style={[GlobalStyle.row, { justifyContent: 'space-between', marginTop: 25 }]}>

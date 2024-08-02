@@ -10,6 +10,10 @@ import HomeProducts from '../../../Components/HomeProducts/HomeProducts';
 import { shopService } from '../../../Services/shopService';
 import { productService } from '../../../Services/productService';
 import Product from '../../../Components/Product/Product';
+import { wishlistService } from '../../../Services/wishlistService';
+import { logout } from '../../../Redux/Store/Slices/Auth';
+import { store } from '../../../Redux/Store';
+import { useSelector } from 'react-redux';
 
 const LoadingSkeleton = () => {
     const numSkeletonItems = 2; // Number of skeleton items to show
@@ -54,9 +58,12 @@ const LoadingSkeleton = () => {
     );
 };
 
-const Home = () => {
+const Home = ({navigation}) => {
     const [refreshing, setRefreshing] = useState(false);
     const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const authData = useSelector((state) => state.auth.data)
+
     const onRefresh = () => {
         setRefreshing(true);
         shopService.getCategories()
@@ -75,6 +82,27 @@ const Home = () => {
     useEffect(() => {
         featuredProduct();
     }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
+          if (authData) {
+            try {
+              setLoading(true);
+              await wishlistService.getWishlist();
+            } catch (error) {
+              if (error.response && error.response.status === 401) {
+                store.dispatch(logout());
+                navigation.reset({ index: 0, routes: [{ name: 'welcome' }] });
+              }
+              console.error('Failed to fetch wishlist:', error);
+            } finally {
+              setLoading(false);
+            }
+          }
+        };
+      
+        fetchData();
+      }, [authData]);
 
     return (
         <SafeAreaView style={{ backgroundColor: bgColor, flex: 1 }}>
