@@ -19,7 +19,7 @@ function App() {
         <NavigationContainer theme={DarkTheme}>
           <StripeProvider
             publishableKey="pk_live_51OOl5PF4UgRmFXvmGgty0RI0iI0YUNVUmh1npCOsU7tudiBydFFoR1MjdsJeFDnI9oOyGbRTi0n3zyzkG93viDvR00cYCTer5n"
-            // publishableKey="pk_test_0rY5rGJ7GN1xEhCB40mAcWjg"
+            //publishableKey="pk_test_0rY5rGJ7GN1xEhCB40mAcWjg"
             urlScheme="free9" // required for 3D Secure and bank redirects
             merchantIdentifier="merchant.com.free99" // required for Apple Pay
           >
