@@ -95,46 +95,46 @@ const ProductDetail = ({ navigation, route }) => {
     const [bestOfferLoading, setBestOfferLoading] = useState(false);
     const token = useSelector((state) => state.auth.token);
 
-    const submitBestOffer = async () => {
-        if (!bestOfferPrice) {
-            return Alert.alert('Error', 'Please enter a price.');
-        }
-
-        setBestOfferLoading(true);
-
-        // Set up form data
-        const formData = new FormData();
-        formData.append('productId', id);
-        formData.append('price', bestOfferPrice);
-
-        // Set up headers
-        const headers = {
-            'Authorization': `Bearer ${token}`,
-
-        };
-
-        try {
-            const response = await axios.post(
-                'https://free99us.com/api/product/best/offer', // Replace with your API endpoint
-                formData,
-                { headers }
-            );
-
-            // Handle success response
-            successToast(response.data.message);
-            setBestOfferModalVisible(false);
-            setBestOfferPrice('');
-        } catch (error) {
-            // Handle error response
-            errorToast('Failed to submit best offer. Please try again.');
-            console.error('Error submitting best offer:', error);
-        } finally {
-            setBestOfferLoading(false);
-        }
-    };
-
     const BestOfferModal = () => {
+        
         const [bestOfferPrice, setBestOfferPrice] = useState('');
+        const submitBestOffer = async () => {
+            if (!bestOfferPrice) {
+                return Alert.alert('Error', 'Please enter a price.');
+            }
+    
+            setBestOfferLoading(true);
+    
+            // Set up form data
+            const formData = new FormData();
+            formData.append('productId', id);
+            formData.append('price', bestOfferPrice);
+    
+            // Set up headers
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+    
+            };
+    
+            try {
+                const response = await axios.post(
+                    'https://free99us.com/api/product/best/offer', // Replace with your API endpoint
+                    formData,
+                    { headers }
+                );
+    
+                // Handle success response
+                successToast(response.data.message);
+                setBestOfferModalVisible(false);
+                setBestOfferPrice('');
+            } catch (error) {
+                // Handle error response
+                errorToast('Failed to submit best offer. Please try again.');
+                console.error('Error submitting best offer:', error);
+            } finally {
+                setBestOfferLoading(false);
+            }
+        };
       return (
         <Modal
             avoidKeyboard={true}
