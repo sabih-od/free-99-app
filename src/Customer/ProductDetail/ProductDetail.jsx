@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, Animated, Dimensions, Image, ImageBackground, Modal, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Dimensions, Image, ImageBackground, KeyboardAvoidingView, Modal, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { bgColor, gap, generalFontSize, GlobalStyle, margin, padding, secondColor, textColor, fontFamily, itemBg, windowWidth, windowHeight, themeColor, whiteColor, blackColor, isIpad } from '../../Styles/Theme';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -16,6 +16,8 @@ import ImageViewing from 'react-native-image-viewing';
 import { ImageViewer } from 'react-native-image-zoom-viewer';
 import { ImageGallery } from '@georstat/react-native-image-gallery';
 import { ImageZoom, ZOOM_TYPE } from '@likashefqet/react-native-image-zoom';
+import CustomInput from '../../Components/CustomInput/CustomInput';
+import axios from 'axios';
 
 const LoadingSkeleton = () => {
     const [opacity] = useState(new Animated.Value(0.3));
@@ -88,6 +90,94 @@ const ProductDetail = ({ navigation, route }) => {
     const [prodLoading, setProdLoading] = useState()
     const [wishlistLoading, setWishlistLoading] = useState()
     const cartLoading = useSelector((state) => state.cart.loading)
+
+    const [bestOfferModalVisible, setBestOfferModalVisible] = useState(false);
+    const [bestOfferLoading, setBestOfferLoading] = useState(false);
+    const token = useSelector((state) => state.auth.token);
+
+    const submitBestOffer = async () => {
+        if (!bestOfferPrice) {
+            return Alert.alert('Error', 'Please enter a price.');
+        }
+
+        setBestOfferLoading(true);
+
+        // Set up form data
+        const formData = new FormData();
+        formData.append('productId', id);
+        formData.append('price', bestOfferPrice);
+
+        // Set up headers
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+
+        };
+
+        try {
+            const response = await axios.post(
+                'https://free99us.com/api/product/best/offer', // Replace with your API endpoint
+                formData,
+                { headers }
+            );
+
+            // Handle success response
+            successToast(response.data.message);
+            setBestOfferModalVisible(false);
+            setBestOfferPrice('');
+        } catch (error) {
+            // Handle error response
+            errorToast('Failed to submit best offer. Please try again.');
+            console.error('Error submitting best offer:', error);
+        } finally {
+            setBestOfferLoading(false);
+        }
+    };
+
+    const BestOfferModal = () => {
+        const [bestOfferPrice, setBestOfferPrice] = useState('');
+      return (
+        <Modal
+            avoidKeyboard={true}
+            visible={bestOfferModalVisible}
+            transparent={true}
+            onRequestClose={() => setBestOfferModalVisible(false)}
+        >
+            <View style={{ flex: 1, backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center' }}>
+                <View style={{ width: Dimensions.get('window').width - 40, height: 220, backgroundColor: 'white', borderRadius: 10, justifyContent: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 20 }}>
+                        <Text style={{
+                            color: blackColor,
+                            fontSize: generalFontSize + 5,
+                            ...fontFamily("regular"),
+                        }}>Enter Your Best Price</Text>
+                        <TouchableOpacity activeOpacity={0.8} onPress={() => setBestOfferModalVisible(false)}>
+                            <Image source={require('../../../assets/images/close.png')} style={{ height: 30, width: 30, resizeMode: 'contain', tintColor: blackColor }} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{ width: Dimensions.get('window').width - 80, height: 55, alignSelf: 'center', borderRadius: 10, marginTop: 20, borderColor: 'black', borderWidth: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginHorizontal: 20, }}>
+                            <Text style={{ color: blackColor, fontSize: generalFontSize, ...fontFamily("regular") }}>$</Text>
+                            <TextInput keyboardType='numeric' style={{ color: blackColor, flex: 1, marginLeft: 5, fontSize: generalFontSize, ...fontFamily("regular") }} placeholder='Enter Price' placeholderTextColor={'grey'} value={bestOfferPrice} onChangeText={setBestOfferPrice} />
+                        </View>
+                    </View>
+                    <TouchableOpacity
+                        onPress={submitBestOffer}
+                        style={{ backgroundColor: themeColor, height: 55, alignItems: 'center', justifyContent: 'center', marginTop: 20, width: Dimensions.get('window').width - 80, borderRadius: 10, alignSelf: 'center' }}
+                        disabled={bestOfferLoading}
+                    >
+                        {bestOfferLoading ? (
+                            <ActivityIndicator color={whiteColor} size={'small'} />
+                        ) : (
+                            <Text style={{ color: whiteColor, fontSize: generalFontSize + 5, fontFamily: 'FreightBigPro-Bold', }}>
+                                SUBMIT
+                            </Text>
+                        )}
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+      )
+    }
 
     const [isVisible, setIsVisible] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -225,86 +315,91 @@ const ProductDetail = ({ navigation, route }) => {
                     <LoadingSkeleton />
                 ) :
                 (
-                    <ScrollView
-                        style={{ minHeight: windowHeight }}
-                        showsVerticalScrollIndicator={false}
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        style={{ flex: 1 }}
                     >
-                        <View style={styles.imgBox}>
-                            <View style={[GlobalStyle.row, GlobalStyle.aic, styles.floatingBtnCont]}>
-                                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.quantityBtn}>
-                                    <FontAwesomeIcon icon={faChevronLeft} size={generalFontSize} color={'#fff'} />
-                                </TouchableOpacity>
-                            </View>
-
-                            <Carousel
-                                loop
-                                width={windowWidth}
-                                autoPlay={true}
-                                data={item?.media}
-                                scrollAnimationDuration={2000}
-                                renderItem={({ item: imgItem, index }) => (
-                                    <TouchableOpacity activeOpacity={0.8} onPress={() => openImage(index)}>
-                                        <ImageBackground
-                                            key={index}
-                                            source={{ uri: imgItem.image }}
-                                            style={[styles.img, { alignItems: 'center', justifyContent: 'center' }]}>
-                                            {disableBtn && (
-                                                <View style={styles.outOfStockOverlay}>
-                                                    <Text style={styles.outofstocktext}>Item is out of Stock.</Text>
-                                                </View>
-                                            )}
-                                        </ImageBackground>
+                        <ScrollView
+                            keyboardShouldPersistTaps="always"
+                            style={{ minHeight: windowHeight }}
+                            showsVerticalScrollIndicator={false}
+                        >
+                            <View style={styles.imgBox}>
+                                <View style={[GlobalStyle.row, GlobalStyle.aic, styles.floatingBtnCont]}>
+                                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.quantityBtn}>
+                                        <FontAwesomeIcon icon={faChevronLeft} size={generalFontSize} color={'#fff'} />
                                     </TouchableOpacity>
-                                )}
-                            />
-                            {isVisible && (
-                                <Modal visible={isVisible} transparent={true} onRequestClose={closeImageZoom}>
-                                    <View style={{
-                                        flex: 1,
-                                        backgroundColor: 'black',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}>
-                                        <ImageZoom
-                                            ref={imageZoomRef}
-                                            uri={galleryImages}
-                                            minScale={0.5}
-                                            maxScale={5}
-                                            doubleTapScale={3}
-                                            minPanPointers={1}
-                                            isDoubleTapEnabled
-                                            onDoubleTap={(zoomType) => {
-                                                console.log('onDoubleTap', zoomType);
-                                                if (zoomType === ZOOM_TYPE.ZOOM_IN) {
-                                                    setTimeout(() => {
-                                                        imageZoomRef.current?.reset();
-                                                    }, 3000);
-                                                }
-                                            }}
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                            }}
-                                            resizeMode="contain"
-                                        />
-                                        <TouchableOpacity onPress={closeImageZoom} style={{
-                                            position: 'absolute',
-                                            top: 40,
-                                            right: 20,
-                                            backgroundColor: 'rgba(0,0,0,0.5)',
-                                            borderRadius: 50,
-                                            padding: 10,
-                                        }}>
-                                            <Text style={{
-                                                color: '#fff',
-                                                fontSize: 18,
-                                            }}>Close</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </Modal>
-                            )}
+                                </View>
 
-                            {/* {isVisible && (
+                                <Carousel
+                                    loop
+                                    width={windowWidth}
+                                    autoPlay={true}
+                                    data={item?.media}
+                                    scrollAnimationDuration={2000}
+                                    renderItem={({ item: imgItem, index }) => (
+                                        <TouchableOpacity activeOpacity={0.8} onPress={() => openImage(index)}>
+                                            <ImageBackground
+                                                key={index}
+                                                source={{ uri: imgItem.image }}
+                                                style={[styles.img, { alignItems: 'center', justifyContent: 'center' }]}>
+                                                {disableBtn && (
+                                                    <View style={styles.outOfStockOverlay}>
+                                                        <Text style={styles.outofstocktext}>Item is out of Stock.</Text>
+                                                    </View>
+                                                )}
+                                            </ImageBackground>
+                                        </TouchableOpacity>
+                                    )}
+                                />
+                                {isVisible && (
+                                    <Modal visible={isVisible} transparent={true} onRequestClose={closeImageZoom}>
+                                        <View style={{
+                                            flex: 1,
+                                            backgroundColor: 'black',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                        }}>
+                                            <ImageZoom
+                                                ref={imageZoomRef}
+                                                uri={galleryImages}
+                                                minScale={0.5}
+                                                maxScale={5}
+                                                doubleTapScale={3}
+                                                minPanPointers={1}
+                                                isDoubleTapEnabled
+                                                onDoubleTap={(zoomType) => {
+                                                    console.log('onDoubleTap', zoomType);
+                                                    if (zoomType === ZOOM_TYPE.ZOOM_IN) {
+                                                        setTimeout(() => {
+                                                            imageZoomRef.current?.reset();
+                                                        }, 3000);
+                                                    }
+                                                }}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                }}
+                                                resizeMode="contain"
+                                            />
+                                            <TouchableOpacity onPress={closeImageZoom} style={{
+                                                position: 'absolute',
+                                                top: 40,
+                                                right: 20,
+                                                backgroundColor: 'rgba(0,0,0,0.5)',
+                                                borderRadius: 50,
+                                                padding: 10,
+                                            }}>
+                                                <Text style={{
+                                                    color: '#fff',
+                                                    fontSize: 18,
+                                                }}>Close</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </Modal>
+                                )}
+
+                                {/* {isVisible && (
                                 <ImageViewing
                                     images={item?.media?.map(mediaItem => ({ uri: mediaItem?.image }))}
                                     imageIndex={currentIndex}
@@ -316,70 +411,86 @@ const ProductDetail = ({ navigation, route }) => {
                             )} */}
 
 
-                        </View>
-                        <View style={[GlobalStyle.container, { height: '100%' }]}>
-                            <View style={[GlobalStyle.row, { justifyContent: 'space-between', marginTop: 25 }]}>
-                                <View style={{ width: windowWidth - 150 }}>
-                                    <Text style={styles.itemTitle}>{item?.name}</Text>
-                                    {item?.stock_quantity < 20 && (
-                                        <Text style={styles.minTitle}>
-                                            Only <Text style={{ color: 'red' }}>{item?.stock_quantity}</Text> {item?.stock_quantity <= 1 ? "item" : 'items'} remaining.
+                            </View>
+                            <View style={[GlobalStyle.container, { height: '100%' }]}>
+                                <View style={[GlobalStyle.row, { justifyContent: 'space-between', marginTop: 25 }]}>
+                                    <View style={{ width: windowWidth - 150 }}>
+                                        <Text style={styles.itemTitle}>{item?.name}</Text>
+                                        {item?.stock_quantity < 20 && (
+                                            <Text style={styles.minTitle}>
+                                                Only <Text style={{ color: 'red' }}>{item?.stock_quantity}</Text> {item?.stock_quantity <= 1 ? "item" : 'items'} remaining.
+                                            </Text>
+                                        )}
+                                        {item?.product_views?.length > 0 && (
+                                            <Text style={styles.minTitle}>
+                                                Viewed by {item?.product_views?.length} people.
+                                            </Text>
+                                        )}
+                                    </View>
+                                    <View style={{ alignItems: 'center' }}>
+                                        <Text style={styles.itemPrice}>${item?.price}</Text>
+                                    </View>
+                                </View>
+                                <View style={[GlobalStyle.row, GlobalStyle.aic, gap(10), { justifyContent: 'space-between', marginVertical: 10 }]}>
+                                    <TouchableOpacity onPress={toggleWishlist} style={styles.minBtn} disabled={wishlistLoading}>
+                                        {wishlistLoading ? (
+                                            <ActivityIndicator color={textColor} size={'small'} />
+                                        ) : (
+                                            <FontAwesomeIcon icon={faHeart} color={isFav ? 'red' : textColor} size={generalFontSize} />
+                                        )}
+                                    </TouchableOpacity>
+                                    <TouchableOpacity disabled={disableBtn} onPress={() => addToCart(item, 'cart')} style={[styles.minBtn, { backgroundColor: disableBtn ? '#ddd' : itemBg }]}>
+                                        {cartLoading ? (
+                                            <ActivityIndicator color={textColor} size={'small'} />
+                                        ) : (
+                                            <FontAwesomeIcon icon={faShoppingCart} color={disableBtn ? blackColor : whiteColor} size={generalFontSize} />
+                                        )}
+                                    </TouchableOpacity>
+                                    <TouchableOpacity disabled={disableBtn} onPress={() => addToCart(item, 'checkout')} style={[GlobalStyle.themeBtn, { flex: 1, backgroundColor: disableBtn ? "#ddd" : themeColor }]}>
+                                        <Text style={[GlobalStyle.themeBtnText, { color: disableBtn ? blackColor : whiteColor }]}>
+                                            Buy Now
                                         </Text>
-                                    )}
-                                    {item?.product_views?.length > 0 && (
-                                        <Text style={styles.minTitle}>
-                                            Viewed by {item?.product_views?.length} people.
+                                    </TouchableOpacity>
+                                    <TouchableOpacity disabled={disableBtn}
+                                        onPress={() => {
+                                            isAuth ?
+                                                setBestOfferModalVisible(true)
+                                                :
+                                                Alert.alert("Login Required", "You need to Login to add items to wishlist", [
+                                                    { text: 'cancel' },
+                                                    { text: 'login', onPress: () => navigation.navigate("login") }
+                                                ]);
+                                        }} style={[GlobalStyle.themeBtn, { flex: 1, backgroundColor: disableBtn ? "#ddd" : themeColor }]}>
+                                        <Text style={[GlobalStyle.themeBtnText, { color: disableBtn ? blackColor : whiteColor }]}>
+                                            Best Offer
                                         </Text>
-                                    )}
+                                    </TouchableOpacity>
                                 </View>
-                                <View style={{ alignItems: 'center' }}>
-                                    <Text style={styles.itemPrice}>${item?.price}</Text>
-                                </View>
-                            </View>
-                            <View style={[GlobalStyle.row, GlobalStyle.aic, gap(10), { justifyContent: 'space-between', marginVertical: 10 }]}>
-                                <TouchableOpacity onPress={toggleWishlist} style={styles.minBtn} disabled={wishlistLoading}>
-                                    {wishlistLoading ? (
-                                        <ActivityIndicator color={textColor} size={'small'} />
-                                    ) : (
-                                        <FontAwesomeIcon icon={faHeart} color={isFav ? 'red' : textColor} size={generalFontSize} />
-                                    )}
-                                </TouchableOpacity>
-                                <TouchableOpacity disabled={disableBtn} onPress={() => addToCart(item, 'cart')} style={[styles.minBtn, { backgroundColor: disableBtn ? '#ddd' : itemBg }]}>
-                                    {cartLoading ? (
-                                        <ActivityIndicator color={textColor} size={'small'} />
-                                    ) : (
-                                        <FontAwesomeIcon icon={faShoppingCart} color={disableBtn ? blackColor : whiteColor} size={generalFontSize} />
-                                    )}
-                                </TouchableOpacity>
-                                <TouchableOpacity disabled={disableBtn} onPress={() => addToCart(item, 'checkout')} style={[GlobalStyle.themeBtn, { flex: 1, backgroundColor: disableBtn ? "#ddd" : themeColor }]}>
-                                    <Text style={[GlobalStyle.themeBtnText, { color: disableBtn ? blackColor : whiteColor }]}>
-                                        Buy Now
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={padding("bottom", 10)}>
-                                <View style={styles.sectionHeader}>
-                                    <Text style={[GlobalStyle.secHeading, { marginBottom: 0 }]}>
-                                        Description
+                                <BestOfferModal />
+                                <View style={padding("bottom", 10)}>
+                                    <View style={styles.sectionHeader}>
+                                        <Text style={[GlobalStyle.secHeading, { marginBottom: 0 }]}>
+                                            Description
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.minDesc}>
+                                        {item?.description}
                                     </Text>
                                 </View>
-                                <Text style={styles.minDesc}>
-                                    {item?.description}
-                                </Text>
-                            </View>
-                            <View style={padding("bottom", 10)}>
-                                <View style={styles.sectionHeader}>
-                                    <Text style={[GlobalStyle.secHeading, { marginBottom: 0 }]}>
-                                        Reviews
-                                    </Text>
-                                </View>
-                                {item?.reviews?.map((review) => (
-                                    <ProductRating key={review.id} review={review} />
-                                ))}
+                                <View style={padding("bottom", 10)}>
+                                    <View style={styles.sectionHeader}>
+                                        <Text style={[GlobalStyle.secHeading, { marginBottom: 0 }]}>
+                                            Reviews
+                                        </Text>
+                                    </View>
+                                    {item?.reviews?.map((review) => (
+                                        <ProductRating key={review.id} review={review} />
+                                    ))}
 
+                                </View>
                             </View>
-                        </View>
-                    </ScrollView>
+                        </ScrollView>
+                    </KeyboardAvoidingView>
                 )
             }
         </View>
