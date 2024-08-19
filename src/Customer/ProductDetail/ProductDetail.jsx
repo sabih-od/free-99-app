@@ -84,6 +84,7 @@ const ProductDetail = ({ navigation, route }) => {
     const id = route.params.id;
     const [item, setItem] = useState()
     const isAuth = useSelector((state) => state.auth.isAuthenticated);
+    const authData = useSelector((state) => state.auth.data)
     const [isFav, setIsFav] = useState(false);
     // const [isLoading, setIsLoading] = useState(loading);
     const [disableBtn, setDisableBtn] = useState(item?.stock_quantity <= 0);
@@ -96,33 +97,32 @@ const ProductDetail = ({ navigation, route }) => {
     const token = useSelector((state) => state.auth.token);
 
     const BestOfferModal = () => {
-        
         const [bestOfferPrice, setBestOfferPrice] = useState('');
         const submitBestOffer = async () => {
             if (!bestOfferPrice) {
                 return Alert.alert('Error', 'Please enter a price.');
             }
-    
+
             setBestOfferLoading(true);
-    
+
             // Set up form data
             const formData = new FormData();
             formData.append('productId', id);
             formData.append('price', bestOfferPrice);
-    
+
             // Set up headers
             const headers = {
                 'Authorization': `Bearer ${token}`,
-    
+
             };
-    
+
             try {
                 const response = await axios.post(
                     'https://free99us.com/api/product/best/offer', // Replace with your API endpoint
                     formData,
                     { headers }
                 );
-    
+
                 // Handle success response
                 successToast(response.data.message);
                 setBestOfferModalVisible(false);
@@ -135,48 +135,48 @@ const ProductDetail = ({ navigation, route }) => {
                 setBestOfferLoading(false);
             }
         };
-      return (
-        <Modal
-            avoidKeyboard={true}
-            visible={bestOfferModalVisible}
-            transparent={true}
-            onRequestClose={() => setBestOfferModalVisible(false)}
-        >
-            <View style={{ flex: 1, backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center' }}>
-                <View style={{ width: Dimensions.get('window').width - 40, height: 220, backgroundColor: 'white', borderRadius: 10, justifyContent: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 20 }}>
-                        <Text style={{
-                            color: blackColor,
-                            fontSize: generalFontSize + 5,
-                            ...fontFamily("regular"),
-                        }}>Enter Your Best Price</Text>
-                        <TouchableOpacity activeOpacity={0.8} onPress={() => setBestOfferModalVisible(false)}>
-                            <Image source={require('../../../assets/images/close.png')} style={{ height: 30, width: 30, resizeMode: 'contain', tintColor: blackColor }} />
+        return (
+            <Modal
+                avoidKeyboard={true}
+                visible={bestOfferModalVisible}
+                transparent={true}
+                onRequestClose={() => setBestOfferModalVisible(false)}
+            >
+                <View style={{ flex: 1, backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ width: Dimensions.get('window').width - 40, height: 220, backgroundColor: 'white', borderRadius: 10, justifyContent: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 20 }}>
+                            <Text style={{
+                                color: blackColor,
+                                fontSize: generalFontSize + 5,
+                                ...fontFamily("regular"),
+                            }}>Enter Your Best Price</Text>
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => setBestOfferModalVisible(false)}>
+                                <Image source={require('../../../assets/images/close.png')} style={{ height: 30, width: 30, resizeMode: 'contain', tintColor: blackColor }} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{ width: Dimensions.get('window').width - 80, height: 55, alignSelf: 'center', borderRadius: 10, marginTop: 20, borderColor: 'black', borderWidth: 1 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginHorizontal: 20, }}>
+                                <Text style={{ color: blackColor, fontSize: generalFontSize, ...fontFamily("regular") }}>$</Text>
+                                <TextInput keyboardType='numeric' style={{ color: blackColor, flex: 1, marginLeft: 5, fontSize: generalFontSize, ...fontFamily("regular") }} placeholder='Enter Price' placeholderTextColor={'grey'} value={bestOfferPrice} onChangeText={setBestOfferPrice} />
+                            </View>
+                        </View>
+                        <TouchableOpacity
+                            onPress={submitBestOffer}
+                            style={{ backgroundColor: themeColor, height: 55, alignItems: 'center', justifyContent: 'center', marginTop: 20, width: Dimensions.get('window').width - 80, borderRadius: 10, alignSelf: 'center' }}
+                            disabled={bestOfferLoading}
+                        >
+                            {bestOfferLoading ? (
+                                <ActivityIndicator color={whiteColor} size={'small'} />
+                            ) : (
+                                <Text style={{ color: whiteColor, fontSize: generalFontSize + 5, fontFamily: 'FreightBigPro-Bold', }}>
+                                    SUBMIT
+                                </Text>
+                            )}
                         </TouchableOpacity>
                     </View>
-                    <View style={{ width: Dimensions.get('window').width - 80, height: 55, alignSelf: 'center', borderRadius: 10, marginTop: 20, borderColor: 'black', borderWidth: 1 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginHorizontal: 20, }}>
-                            <Text style={{ color: blackColor, fontSize: generalFontSize, ...fontFamily("regular") }}>$</Text>
-                            <TextInput keyboardType='numeric' style={{ color: blackColor, flex: 1, marginLeft: 5, fontSize: generalFontSize, ...fontFamily("regular") }} placeholder='Enter Price' placeholderTextColor={'grey'} value={bestOfferPrice} onChangeText={setBestOfferPrice} />
-                        </View>
-                    </View>
-                    <TouchableOpacity
-                        onPress={submitBestOffer}
-                        style={{ backgroundColor: themeColor, height: 55, alignItems: 'center', justifyContent: 'center', marginTop: 20, width: Dimensions.get('window').width - 80, borderRadius: 10, alignSelf: 'center' }}
-                        disabled={bestOfferLoading}
-                    >
-                        {bestOfferLoading ? (
-                            <ActivityIndicator color={whiteColor} size={'small'} />
-                        ) : (
-                            <Text style={{ color: whiteColor, fontSize: generalFontSize + 5, fontFamily: 'FreightBigPro-Bold', }}>
-                                SUBMIT
-                            </Text>
-                        )}
-                    </TouchableOpacity>
                 </View>
-            </View>
-        </Modal>
-      )
+            </Modal>
+        )
     }
 
     const [isVisible, setIsVisible] = useState(false);
@@ -439,20 +439,38 @@ const ProductDetail = ({ navigation, route }) => {
                                             <FontAwesomeIcon icon={faHeart} color={isFav ? 'red' : textColor} size={generalFontSize} />
                                         )}
                                     </TouchableOpacity>
-                                    <TouchableOpacity disabled={disableBtn} onPress={() => addToCart(item, 'cart')} style={[styles.minBtn, { backgroundColor: disableBtn ? '#ddd' : itemBg }]}>
+                                    <TouchableOpacity disabled={disableBtn}
+                                        onPress={() => {
+                                            if (route?.params?.data?.user_id === authData?.user_subscription?.user_id) {
+                                                return Alert.alert('You cannot buy your own product')
+                                            }
+                                            addToCart(item, 'cart')
+                                        }}
+                                        style={[styles.minBtn, { backgroundColor: disableBtn ? '#ddd' : itemBg }]}>
                                         {cartLoading ? (
                                             <ActivityIndicator color={textColor} size={'small'} />
                                         ) : (
                                             <FontAwesomeIcon icon={faShoppingCart} color={disableBtn ? blackColor : whiteColor} size={generalFontSize} />
                                         )}
                                     </TouchableOpacity>
-                                    <TouchableOpacity disabled={disableBtn} onPress={() => addToCart(item, 'checkout')} style={[GlobalStyle.themeBtn, { flex: 1, backgroundColor: disableBtn ? "#ddd" : themeColor }]}>
+                                    <TouchableOpacity disabled={disableBtn}
+                                        onPress={() => {
+                                            if (route?.params?.data?.user_id === authData?.user_subscription?.user_id) {
+                                                return Alert.alert('You cannot buy your own product')
+                                            }
+                                            addToCart(item, 'checkout')
+                                        }}
+                                        style={[GlobalStyle.themeBtn, { flex: 1, backgroundColor: disableBtn ? "#ddd" : themeColor }]}>
                                         <Text style={[GlobalStyle.themeBtnText, { color: disableBtn ? blackColor : whiteColor }]}>
                                             Buy Now
                                         </Text>
                                     </TouchableOpacity>
+
                                     <TouchableOpacity disabled={disableBtn}
                                         onPress={() => {
+                                            if (route?.params?.data?.user_id === authData?.user_subscription?.user_id) {
+                                                return Alert.alert('You cannot give best offer to your own product')
+                                            }
                                             isAuth ?
                                                 setBestOfferModalVisible(true)
                                                 :
