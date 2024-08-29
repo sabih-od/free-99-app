@@ -13,6 +13,7 @@ export const cartService = {
             name: item.name,
             quantity: 1,
             price: item.price,
+            shippingPrice: item.shipping_price,
             stock_quantity: item.stock_quantity,
             image: item?.media ? item?.media[0]?.image : item.image
         };
@@ -95,7 +96,7 @@ export const cartService = {
                 cartItems = JSON.parse(cartItems);
                 if (cartItems?.length > 0) {
                     cartItems.forEach(cartItem => {
-                        totalPrice += (cartItem?.price * cartItem?.quantity);
+                        totalPrice += (cartItem?.price * cartItem?.quantity) + Number(cartItem?.shippingPrice);
                         totalQuantity += cartItem?.quantity;
                     });
                 }

@@ -18,7 +18,7 @@ import { errorToast, successToast } from '../../../Utils/toast';
 
 const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) => {
     const category = useSelector((state) => state.shop.category);
-    const image_id = updateProduct?.media?.map((item)=> item?.id)
+    const image_id = updateProduct?.media?.map((item) => item?.id)
     const product_id = updateProduct?.id
     console.log('category', category)
     const loading = useSelector((state) => state.auth.loading);
@@ -116,17 +116,17 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
 
     const deleteImage = (productId, imageId) => {
         productService.removeGalleryImages(productId, imageId)
-          .then(() => {
-            setPhotos((prevPhotos) => prevPhotos.filter(photo => photo?.id !== imageId));
-            alert('Image Deleted')
-            productService.getProducts();
-            // handle success, e.g., update state to remove the deleted image from the UI
-          })
-          .catch(error => {
-            console.error('Error deleting image:', error);
-            Alert.alert('Error', 'An error occurred while deleting the image. Please try again.');
-          });
-      };
+            .then(() => {
+                setPhotos((prevPhotos) => prevPhotos.filter(photo => photo?.id !== imageId));
+                alert('Image Deleted')
+                productService.getProducts();
+                // handle success, e.g., update state to remove the deleted image from the UI
+            })
+            .catch(error => {
+                console.error('Error deleting image:', error);
+                Alert.alert('Error', 'An error occurred while deleting the image. Please try again.');
+            });
+    };
 
     const deleteFeaturedImage = () => {
         setFeaturedImage(null);
@@ -151,6 +151,13 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
 
             if (data.price <= 0 || data.price == null || data.price == undefined) {
                 errorToast('Please enter a price greater than 0.');
+                scrollViewRef.current.scrollTo({ y: 600, animated: true });
+                setUptLoad(false)
+                return;
+            }
+
+            if (data.shipping_price < 0 || data.price == null || data.price == undefined) {
+                errorToast('Please enter shipping price greater than or equal to 0.');
                 scrollViewRef.current.scrollTo({ y: 600, animated: true });
                 setUptLoad(false)
                 return;
@@ -278,6 +285,7 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
             setValue('description', updateProduct.description);
             setValue('category_id', updateProduct.category_id);
             setValue('price', updateProduct.price?.toString());
+            setValue('shipping_price', updateProduct.shipping_price?.toString());
             setValue('stock_quantity', updateProduct.stock_quantity?.toString());
             setValue('brand', updateProduct.brand);
             setValue('featured', updateProduct.featured == 1);
@@ -508,6 +516,35 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
                                     {errors.price && <Text style={{ color: 'red', marginTop: 5 }}>{errors.price.message}</Text>}
                                 </View>
                             </View>
+
+                            <View style={[GlobalStyle.inputCont, { width: '100%' }]}>
+                                <Text style={GlobalStyle.inputLabel}>Shipping Price</Text>
+                                <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
+                                    <Controller
+                                        control={control}
+                                        rules={{
+                                            required: 'Shipping Price is required', min: {
+                                                value: 0,
+                                                message: 'Shipping price Should be minimum of 0'
+                                            }
+                                        }}
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                            <TextInput
+                                                style={GlobalStyle.input}
+                                                placeholder='Shipping Price'
+                                                placeholderTextColor={'#707070'}
+                                                keyboardType='numeric'
+                                                onBlur={onBlur}
+                                                onChangeText={onChange}
+                                                value={value}
+                                            />
+                                        )}
+                                        name="shipping_price"
+                                    />
+                                    {errors.shipping_price && <Text style={{ color: 'red', marginTop: 5 }}>{errors.shipping_price.message}</Text>}
+                                </View>
+                            </View>
+
                             <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
                                 <Text style={GlobalStyle.inputLabel}>Stock</Text>
                                 <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>

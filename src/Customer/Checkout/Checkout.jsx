@@ -90,7 +90,10 @@ const Checkout = ({ navigation }) => {
                         <Image style={styles.image} source={{ uri: item?.image }} />
                         <View style={{ flex: 1 }}>
                           <Text style={[GlobalStyle.orderMainText, { fontSize: generalFontSize - 2 }]}>{item?.name}</Text>
+                          <Text style={[GlobalStyle.orderMinText, { marginBottom: 0 }]}><Text style={{ color: textColor }}>Quantity:</Text> {item?.quantity}</Text>
                           <Text style={[GlobalStyle.orderMinText, { marginBottom: 0 }]}><Text style={{ color: textColor }}>Price:</Text> ${(item.price * item.quantity).toFixed(2)}</Text>
+                          <Text style={[GlobalStyle.orderMinText, { marginBottom: 0 }]}><Text style={{ color: textColor }}>Shipping Price:</Text> ${!item.shippingPrice ? 0 : item?.shippingPrice}</Text>
+                          <Text style={[GlobalStyle.orderMinText, { marginBottom: 0 }]}><Text style={{ color: textColor }}>Total:</Text> ${(item.price * item.quantity) + Number(item?.shippingPrice)}</Text>
                           {/* <View style={[GlobalStyle.row, GlobalStyle.aic, gap(10), margin('top', 20)]}>
                       <View style={[GlobalStyle.row, GlobalStyle.aic, gap(10)]}>
                         <TouchableOpacity onPress={() => cartService.subtract(item)} style={[styles.quantityBtn]}>

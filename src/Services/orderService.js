@@ -137,6 +137,7 @@ export const orderService = {
             name: item?.name,
             price: item?.price,
             qty: item?.quantity,
+            shipping_price: Number(item?.shippingPrice) || 0,
             options: {
               product: {
                 id: item?.id
@@ -146,13 +147,17 @@ export const orderService = {
         })
       };
 
+      console.log(payload, 'payload')
+
       const response = await apiClient.post('/order/now', payload);
       store.dispatch(setLoading(true));
 
       return response.data;
     } catch (error) {
-      const errorMessage = error.response.data.message;
+      const errorMessage = error;
       const errors = error.response.data.errors;
+
+      console.log(error.response.data, 'qwerty')
 
       console.warn('errorMessage', errorMessage)
       for (const key in errors) {

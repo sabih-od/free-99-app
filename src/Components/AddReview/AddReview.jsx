@@ -33,8 +33,15 @@ const AddReview = ({ modalIsVisible, closeModal, itemId }) => {
         reset({ comment: '' }); // Reset form fields
     };
 
+    const [ratingError, setRatingError] = useState(false);
+
     const onSubmit = async (data) => {
+        if (!rating) {
+            setRatingError(true);
+            return;
+        }
         setLoading(true);
+        setRatingError(false)
         const reviewData = {
             product_id: itemId,
             comment: data.comment,
@@ -114,6 +121,7 @@ const AddReview = ({ modalIsVisible, closeModal, itemId }) => {
                                                         </TouchableOpacity>
                                                     ))}
                                                 </View>
+                                                {ratingError && <Text style={{ color: 'red', marginTop: 5 }}>Please give rating</Text>}
                                             </View></View>
                                         <TouchableOpacity style={[GlobalStyle.themeBtn, { marginTop: 20 }]} onPress={handleSubmit(onSubmit)}>
                                             <Text style={[GlobalStyle.themeBtnText]}>Submit Review</Text>

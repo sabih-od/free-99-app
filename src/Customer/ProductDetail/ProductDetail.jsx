@@ -83,6 +83,7 @@ const LoadingSkeleton = () => {
 const ProductDetail = ({ navigation, route }) => {
     const id = route.params.id;
     const [item, setItem] = useState()
+    console.log(item?.shipping_price, 'item?.shipping_price')
     const isAuth = useSelector((state) => state.auth.isAuthenticated);
     const authData = useSelector((state) => state.auth.data)
     const [isFav, setIsFav] = useState(false);
@@ -118,7 +119,8 @@ const ProductDetail = ({ navigation, route }) => {
 
             try {
                 const response = await axios.post(
-                    'https://free99us.com/api/product/best/offer', // Replace with your API endpoint
+                    // 'https://dev.free99us.com/api/product/best/offer',
+                    'https://free99us.com/api/product/best/offer',
                     formData,
                     { headers }
                 );
@@ -307,6 +309,8 @@ const ProductDetail = ({ navigation, route }) => {
     }, [disableBtn, isAuth, navigation]);
 
     const galleryImages = item?.media[currentIndex]?.image;
+
+    console.log('item', item)
 
     return (
         <View style={{ backgroundColor: bgColor, flex: 1 }}>

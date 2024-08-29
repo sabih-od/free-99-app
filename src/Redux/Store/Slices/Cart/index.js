@@ -17,8 +17,12 @@ export const cartSlice = createSlice({
     initialState,
     reducers: {
         setCart: (state, action) => {
-            state.data = action?.payload;
+            state.data = action.payload.map(item => ({
+                ...item,
+                shipping_price: item.shipping_price // Ensure shipping_price is included
+            }));
             AsyncStorage.setItem('cart', JSON.stringify(state.data));
+            // Calculate totalPrice and totalQuantity here if necessary
         },
         setTotalPrice: (state, action) => {
             state.totalPrice = action?.payload;

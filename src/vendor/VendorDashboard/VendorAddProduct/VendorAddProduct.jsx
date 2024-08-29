@@ -154,6 +154,10 @@ const VendorAddProduct = ({ navigation }) => {
             return errorToast('Please enter a price greater than 0.');
         }
 
+        if (data.shipping_price < 0 || data.price == null || data.price == undefined) {
+            return errorToast('Please enter a price greater than or equal to 0.');
+        }
+
         if (data.stock_quantity <= 0 || data.stock_quantity == null || data.stock_quantity == undefined) {
             return errorToast('Please enter a stock quantity greater than 0.');
         }
@@ -222,7 +226,7 @@ const VendorAddProduct = ({ navigation }) => {
     }
 
     const callback = async (data) => {
-        setLoad(!load)
+        setLoad(true)
         console.log('callback data', data);
 
         const _data = validateData(data?.data);
@@ -253,7 +257,7 @@ const VendorAddProduct = ({ navigation }) => {
                     setSale(false);
                     setFavourites(false)
                     productService.getProducts();
-                    setLoad(!load)
+                    setLoad(false)
                     navigation.navigate('vendorProducts');
                 });
         }
@@ -460,6 +464,35 @@ const VendorAddProduct = ({ navigation }) => {
                                         {errors.price && <Text style={{ color: 'red', marginTop: 5 }}>{errors.price.message}</Text>}
                                     </View>
                                 </View>
+
+                                <View style={[GlobalStyle.inputCont, { width: '100%' }]}>
+                                    <Text style={GlobalStyle.inputLabel}>Shipping Price</Text>
+                                    <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>
+                                        <Controller
+                                            control={control}
+                                            rules={{
+                                                required: 'Price is required', min: {
+                                                    value: 0,
+                                                    message: 'Price Should be minimum of 0'
+                                                }
+                                            }}
+                                            render={({ field: { onChange, onBlur, value } }) => (
+                                                <TextInput
+                                                    style={GlobalStyle.input}
+                                                    placeholder='Enter Price'
+                                                    placeholderTextColor={'#707070'}
+                                                    keyboardType='numeric'
+                                                    onBlur={onBlur}
+                                                    onChangeText={onChange}
+                                                    value={value}
+                                                />
+                                            )}
+                                            name="shipping_price"
+                                        />
+                                        {errors.shipping_price && <Text style={{ color: 'red', marginTop: 5 }}>{errors.shipping_price.message}</Text>}
+                                    </View>
+                                </View>         
+
                                 <View style={[GlobalStyle.inputCont, { marginTop: 20, width: '100%' }]}>
                                     <Text style={GlobalStyle.inputLabel}>Stock</Text>
                                     <View style={[GlobalStyle.inputContainer, { marginTop: 5 }]}>

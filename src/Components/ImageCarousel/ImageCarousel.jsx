@@ -1,8 +1,8 @@
-import { Dimensions, Text, View, StyleSheet, Image, TouchableHighlight } from 'react-native';
+import { Dimensions, Text, View, StyleSheet, Image, TouchableHighlight, ImageBackground } from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import Carousel from 'react-native-reanimated-carousel';
 import { useNavigation } from '@react-navigation/native';
-import { isIpad, whiteColor, windowWidth } from '../../Styles/Theme';
+import { isIpad, themeColor, whiteColor, windowWidth } from '../../Styles/Theme';
 import { bannerService } from '../../Services/bannerService';
 
 const ImageCarousel = () => {
@@ -39,12 +39,19 @@ const ImageCarousel = () => {
                 renderItem={({ index, item }) => (
                     <TouchableHighlight
                         onPress={() => navigation.navigate('shop')}
-                        style={[styles.imgContainer, {paddingHorizontal: 10, borderRadius: 5}]}
+                        style={[styles.imgContainer, { paddingHorizontal: 10, borderRadius: 5 }]}
                     >
-                        <Image
+                        <ImageBackground
                             source={item.image}
-                            style={[styles.imageStyle, {borderRadius: 5}]}
-                        />
+                            style={[styles.imageStyle, { borderRadius: 5 }]}
+                        >
+                            {index === 0 ? <View style={{ paddingLeft: 20, paddingTop: 20 }}>
+                                <Text style={{ fontSize: 20, color: '#fff', fontWeight: '700' }}>Free99</Text>
+                                    <View style={{ backgroundColor: themeColor, height: 50, width: 150, borderRadius: 10, alignItems: 'flex-end', marginTop: 50, alignItems: 'center', justifyContent: 'center'}}>
+                                        <Text style={{fontSize: 20, color: '#fff', fontWeight: '700'}}>Shop now</Text>
+                                    </View>
+                            </View> : null}
+                        </ImageBackground>
                     </TouchableHighlight>
                 )}
             />
