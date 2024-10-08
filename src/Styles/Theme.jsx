@@ -162,7 +162,23 @@ export const GlobalStyle = StyleSheet.create({
         textAlign: 'left',
         color: '#828282',
         borderColor: '#0005',
-        borderWidth: 1
+        borderWidth: 1,
+    },
+    inputFull: {
+        paddingVertical: 15,
+        height: isIpad ? 70 : 50,
+        paddingHorizontal: 20,
+        backgroundColor: whiteColor,
+        borderRadius: 10,
+        ...fontFamily('regular'),
+        fontSize: generalFontSize - 4,
+        fontWeight: '400',
+        lineHeight: isIpad ? generalFontSize + 10 : null,
+        textAlign: 'left',
+        color: '#828282',
+        borderColor: '#0005',
+        borderWidth: 1,
+        flex: 1
     },
     inputText: {
         ...fontFamily('regular'),

@@ -1,8 +1,9 @@
-import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, FlatList, ActivityIndicator } from 'react-native'
+import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, FlatList, ActivityIndicator, TextInput } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
-import { bgColor, gap, generalFontSize, GlobalStyle, margin, padding, textColor, fontFamily, windowWidth, whiteColor, } from '../../Styles/Theme'
-import { cartService } from '../../Services/cartService';
+import { bgColor, gap, generalFontSize, GlobalStyle, margin, padding, textColor, fontFamily, windowWidth, whiteColor } from '../../Styles/Theme'
 import { useSelector } from 'react-redux';
+import { useForm } from 'react-hook-form';
+import { cartService } from '../../Services/cartService';
 import StripePayment from '../../Components/Payment/StripePayment';
 import AddressModal from '../../Components/AddressModal/AddressModal';
 import { errorToast } from '../../Utils/toast';
@@ -15,9 +16,11 @@ const Checkout = ({ navigation }) => {
   const [showModal, setShowModal] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [cartItems, setCartItems] = useState(data);
-  const { data, totalPrice, totalQuantity } = useSelector((state) => state.cart);
+  const { data, totalPrice, discount, actualPrice } = useSelector((state) => state.cart);
   const authData = useSelector((state) => state.auth.data)
   const stripePaymentRef = useRef()
+  const codeRef = useRef();
+  const { handleSubmit, formState: { errors }, register, setValue } = useForm();
 
   const toggleModal = () => {
     setShowModal(!showModal);
@@ -25,6 +28,19 @@ const Checkout = ({ navigation }) => {
 
   const togglePhoneModal = () => {
     setShowPhoneModal(!showPhoneModal);
+  };
+
+  const onSubmit = async (data) => { 
+    const formData = new FormData()
+
+    formData.append('code', data?.code ?? '');
+    formData.append('amount', totalPrice);
+
+    try {
+      await cartService.applyVoucher(formData);
+    } catch (error) {
+      console.error('Discount apply failed:', error);
+    }
   };
 
   useEffect(() => {
@@ -35,14 +51,22 @@ const Checkout = ({ navigation }) => {
     setCartItems(data);
   }, [data])
 
+  useEffect(() => {
+    console.log('totalPrice', totalPrice)
+  }, [totalPrice])
+
+  useEffect(() => {
+    console.log('discount', discount);
+  }, [discount])
+
   const orderNow = () => {
     if (totalPrice > 0) {
       if (!authData?.phone) {
-        errorToast("Please Provide Phone Number")
+        errorToast('Please Provide Phone Number')
         togglePhoneModal()
       }
       else if (!authData?.address) {
-        errorToast("Please Provide Address")
+        errorToast('Please Provide Address')
         toggleModal()
       }
       else {
@@ -53,7 +77,7 @@ const Checkout = ({ navigation }) => {
 
   const emptyCart = async () => {
     await cartService.remove();
-    successToast("Your Cart has been Empty")
+    successToast('Your Cart has been Empty')
   }
 
   const callback = async (payload) => {
@@ -143,6 +167,47 @@ const Checkout = ({ navigation }) => {
                     </View>
                   </View>
                 </View>
+
+                <View style={styles.section}>
+                  <View style={[GlobalStyle.row, GlobalStyle.aic, { gap: 20, marginBottom: 10, justifyContent: 'space-between' }]}>
+                    <Text style={[styles.heading, margin('', 0)]}>Discount</Text>
+                    {
+                      ( discount === 0 ) &&
+                        <TouchableOpacity onPress={handleSubmit(onSubmit)} style={[padding('horizontal', 20), padding("vertical", 5)]}>
+                          <Text style={GlobalStyle.link}>Apply</Text>
+                        </TouchableOpacity>
+                    }
+                  </View>
+                  <View style={[GlobalStyle.card, { gap: 10 }]}>
+                    {
+                      ( discount > 0 )
+                        ?
+                          <View style={[GlobalStyle.row, { gap: 20, justifyContent: 'space-between', alignItems: 'center' }]}>
+                            <Text style={[GlobalStyle.orderMinText, { marginBottom: 0 }]}>Discount: </Text>
+                            <Text style={[GlobalStyle.orderMinText, { marginBottom: 0 }]}>{discount}%</Text>
+                          </View>
+                        :
+                          <View style={[GlobalStyle.row, { gap: 20, justifyContent: 'space-between', alignItems: 'center' }]}>
+                            <Text style={[GlobalStyle.orderMinText, { marginBottom: 0 }]}>Code: </Text>
+                            <TextInput
+                              style={GlobalStyle.inputFull}
+                              placeholder='Enter Voucher Code'
+                              placeholderTextColor={'#707070'}
+                              keyboardType='default'
+                              autoCapitalize='none'
+                              returnKeyType="done"
+                              defaultValue={''}
+                              {...register("code", { required: 'Voucher code is required', value: discount ?? '' })}
+                              ref={codeRef}
+                              onChangeText={(value) => setValue('code', value)}
+                            />
+                          </View>
+                    }
+                    
+                    { errors.code && <Text style={{ color: 'red', marginTop: 5, textAlign: 'right' }}>{errors.code.message}</Text> }
+                  </View>
+                </View>
+                
                 {/* <View style={styles.section}>
             <View style={[GlobalStyle.row, GlobalStyle.aic, { gap: 20, marginBottom: 10, justifyContent: 'space-between' }]}>
               <Text style={[styles.heading, margin('', 0)]}>Payment Method</Text>
@@ -181,6 +246,12 @@ const Checkout = ({ navigation }) => {
                     <View style={[GlobalStyle.row, GlobalStyle.aic, { gap: 20, justifyContent: 'space-between' }]}>
                       <Text style={[GlobalStyle.orderMinText, { marginBottom: 0 }]}>Total Items: </Text>
                       <Text style={[GlobalStyle.orderMainText, { fontSize: generalFontSize - 2 }]}>{data.length}</Text>
+                    </View>
+                    <View style={[GlobalStyle.row, GlobalStyle.aic, { gap: 20, justifyContent: 'space-between' }]}>
+                      <Text style={[GlobalStyle.orderMinText, { marginBottom: 0 }]}>Actual Price: </Text>
+                      <Text style={[GlobalStyle.orderMainText, { fontSize: generalFontSize - 2 }]}>
+                        ${actualPrice?.toFixed(2)}
+                      </Text>
                     </View>
                     <View style={[GlobalStyle.row, GlobalStyle.aic, { gap: 20, justifyContent: 'space-between' }]}>
                       <Text style={[GlobalStyle.orderMinText, { marginBottom: 0 }]}>Total Price: </Text>

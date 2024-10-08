@@ -117,6 +117,21 @@ export const orderService = {
     store.dispatch(setLoading(true));
     const { cart, auth } = store.getState();
 
+    let total_price = cart?.totalPrice;
+    let total_amount_after_discount = 0;
+    let discounted_amount = 0;
+
+    if(cart?.discount && cart?.discount > 0) {
+      // remove the discount amount and come to the actual amount
+      total_price = (await store.getState().cart).actualPrice;
+      
+      // total amount is an actually discounted
+      total_amount_after_discount = cart?.totalPrice;
+
+      // discounted amount
+      discounted_amount = total_price - total_amount_after_discount;
+    }
+
     try {
       const payload = {
         stripe_token: data?.paymentIntentId,
@@ -128,10 +143,14 @@ export const orderService = {
         zip: cart?.info?.zip ?? auth?.data?.zip,
         state: cart?.info?.state ?? auth?.data?.state_id,
         address: cart?.info?.address ?? auth?.data?.address,
-        total_price: cart.totalPrice,
-        total_qty: cart.totalQuantity,
         shippingAddress: `${auth?.data?.address}, ${auth?.data?.city}, ${auth?.data?.state?.name}, ${auth?.data?.country?.name}, ${auth?.data?.zip}`,
-        cartItems: cart.data.map(item => {
+        total_qty: cart?.totalQuantity,
+
+        total_price: total_price,
+        total_amount_after_discount: total_amount_after_discount,
+        discounted_amount: discounted_amount,
+
+        cartItems: cart?.data.map(item => {
           return {
             id: item?.id,
             name: item?.name,

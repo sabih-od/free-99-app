@@ -5,10 +5,12 @@ import { cartService } from '../../../../Services/cartService';
 const initialState = async () => {
     return {
         data: [],
+        actualPrice: 0,
         totalPrice: 0,
         totalQuantity: 0,
         info: {},
-        loading: false
+        loading: false,
+        discount: 0
     }
 }
 
@@ -23,6 +25,9 @@ export const cartSlice = createSlice({
             }));
             AsyncStorage.setItem('cart', JSON.stringify(state.data));
             // Calculate totalPrice and totalQuantity here if necessary
+        },
+        setActualPrice: (state, action) => {
+            state.actualPrice = action?.payload;
         },
         setTotalPrice: (state, action) => {
             state.totalPrice = action?.payload;
@@ -47,11 +52,14 @@ export const cartSlice = createSlice({
         setLoading: (state, action) => {
             state.loading = action.payload;
         },
+        setDiscount: (state, action) => {
+            state.discount = action.payload;
+        }
         // resetCart: () => initialState
 
     }
 });
 
 // Export the generated action creators and reducer
-export const { setCart, setTotalPrice, setTotalQuantity, setLoading } = cartSlice.actions;
+export const { setCart, setTotalPrice, setTotalQuantity, setLoading, setDiscount, setActualPrice } = cartSlice.actions;
 export default cartSlice.reducer;
