@@ -148,21 +148,21 @@ export const cartService = {
     applyVoucher: async (payload) => {
         store.dispatch(setLoading(true))
         try {
-          const response = await apiClient.post('/apply/voucher', payload);
-          console.log('response?.data', response?.data);
+            const response = await apiClient.post('/apply/voucher', payload);
+            console.log('response?.data', response?.data);
 
-          successToast(response?.data.message);
+            successToast(response?.data.message);
 
-          store.dispatch(setTotalPrice(response?.data?.data?.total_amount_with_discount));
-          store.dispatch(setDiscount(response?.data?.data?.discounted_amount));
-    
-          store.dispatch(setLoading(false))
-          return response?.data;
+            store.dispatch(setTotalPrice(response?.data?.data?.total_amount_with_discount));
+            store.dispatch(setDiscount(response?.data?.data?.discounted_amount));
+
+            store.dispatch(setLoading(false))
+            return response?.data;
         } catch (error) {
-          console.log('Error making request:', error?.response?.data?.message);
-          errorToast(error?.response?.data?.message)
-          store.dispatch(setLoading(false))
-          throw error;
+            console.log('Error making request:', error?.response?.data?.message);
+            errorToast(error?.response?.data?.message)
+            store.dispatch(setLoading(false))
+            throw error;
         }
     },
 };
