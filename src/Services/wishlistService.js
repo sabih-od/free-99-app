@@ -1,24 +1,33 @@
 import axios from 'axios';
-import { BASE_URL } from '../Constants';
-import { store } from "./../Redux/Store";
-import { setLoading, setWishlistItems, addItemToWishlist, removeItemFromWishlist, setError } from '../Redux/Store/Slices/Wishlist';
+import {BASE_URL} from '../Constants';
+import {store} from './../Redux/Store';
+import {
+  setLoading,
+  setWishlistItems,
+  addItemToWishlist,
+  removeItemFromWishlist,
+  setError,
+} from '../Redux/Store/Slices/Wishlist';
 
 const wishlistApiClient = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
+    Accept: 'application/json',
+  },
 });
 
 // Ensuring the authorization token is attached to each request
-wishlistApiClient.interceptors.request.use(config => {
-  const { auth } = store.getState();
-  config.headers['Authorization'] = `Bearer ${auth.token}`;
-  return config;
-}, error => {
-  return Promise.reject(error);
-});
+wishlistApiClient.interceptors.request.use(
+  config => {
+    const {auth} = store.getState();
+    config.headers['Authorization'] = `Bearer ${auth.token}`;
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  },
+);
 
 export const wishlistService = {
   getWishlist: async () => {
@@ -36,12 +45,10 @@ export const wishlistService = {
     }
   },
 
-  isWishlisted: async (id) => {
+  isWishlisted: async id => {
     store.dispatch(setLoading(true));
-    console.log('id', id)
     try {
       const response = await wishlistApiClient.get(`/wishlist/${id}`);
-      console.log('isWishlisted response', response)
       return response.message;
     } catch (error) {
       console.log('Failed to fetch:', error);
@@ -51,19 +58,20 @@ export const wishlistService = {
     }
   },
 
-  addToWishlist: async (id) => {
+  addToWishlist: async id => {
     store.dispatch(setLoading(true));
     try {
-      const response = await wishlistApiClient.post('/wishlist/store', { "product_id": id });
+      const response = await wishlistApiClient.post('/wishlist/store', {
+        product_id: id,
+      });
       store.dispatch(setLoading(false));
-      console.log("add wishlist response=> ", response)
       return response.data;
     } catch (error) {
       console.log('Failed to add to wishlist:', error);
       store.dispatch(setError(error.toString()));
       store.dispatch(setLoading(false));
-      console.log("add wishlist response=> ", response)
+      console.log('add wishlist response=> ', response);
       throw error;
     }
-  }
-}
+  },
+};

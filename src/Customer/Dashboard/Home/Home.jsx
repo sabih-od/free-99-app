@@ -126,7 +126,7 @@ const Home = ({navigation}) => {
                             title={'Ready-Set-Summer'}
                         />
                     </View>
-                    <View style={{}}>
+                    <View>
                         <Text style={{
                             fontFamily: 'FreightBigPro-Bold',
                             fontSize: generalFontSize + 8,
