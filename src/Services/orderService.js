@@ -1,29 +1,32 @@
 import axios from 'axios';
-import { BASE_URL } from '../Constants';
-import { store } from './../Redux/Store';
+import {BASE_URL} from '../Constants';
+import {store} from './../Redux/Store';
 import {
   setPendingOrders,
   setCompletedOrders,
   setRecentOrders,
   setLoading,
-  setError
+  setError,
 } from '../Redux/Store/Slices/Order/index';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
+    Accept: 'application/json',
+  },
 });
 
-apiClient.interceptors.request.use(config => {
-  const { auth } = store.getState();
-  config.headers['Authorization'] = `Bearer ${auth.token}`;
-  return config;
-}, error => {
-  return Promise.reject(error);
-});
+apiClient.interceptors.request.use(
+  config => {
+    const {auth} = store.getState();
+    config.headers['Authorization'] = `Bearer ${auth.token}`;
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  },
+);
 
 export const orderService = {
   getPendingOrders: async () => {
@@ -71,7 +74,7 @@ export const orderService = {
     }
   },
 
-  checkoutOrder: async (orderData) => {
+  checkoutOrder: async orderData => {
     store.dispatch(setLoading(true));
     try {
       const response = await apiClient.post('/order/checkout', orderData);
@@ -85,10 +88,12 @@ export const orderService = {
     }
   },
 
-  processStripeToken: async (stripeToken) => {
+  processStripeToken: async stripeToken => {
     store.dispatch(setLoading(true));
     try {
-      const response = await apiClient.post('/order/stripe/token', { stripeToken });
+      const response = await apiClient.post('/order/stripe/token', {
+        stripeToken,
+      });
       return response.data;
     } catch (error) {
       console.log('Failed to process Stripe token:', error);
@@ -99,7 +104,7 @@ export const orderService = {
     }
   },
 
-  returnOrder: async (returnData) => {
+  returnOrder: async returnData => {
     store.dispatch(setLoading(true));
     try {
       const response = await apiClient.post('/order/return', returnData);
@@ -113,18 +118,18 @@ export const orderService = {
     }
   },
 
-  orderNow: async (data) => {
+  orderNow: async data => {
     store.dispatch(setLoading(true));
-    const { cart, auth } = store.getState();
+    const {cart, auth} = store.getState();
 
     let total_price = cart?.totalPrice;
     let total_amount_after_discount = 0;
     let discounted_amount = 0;
 
-    if(cart?.discount && cart?.discount > 0) {
+    if (cart?.discount && cart?.discount > 0) {
       // remove the discount amount and come to the actual amount
       total_price = (await store.getState().cart).actualPrice;
-      
+
       // total amount is an actually discounted
       total_amount_after_discount = cart?.totalPrice;
 
@@ -159,14 +164,12 @@ export const orderService = {
             shipping_price: Number(item?.shippingPrice) || 0,
             options: {
               product: {
-                id: item?.id
-              }
-            }
+                id: item?.id,
+              },
+            },
           };
-        })
+        }),
       };
-
-      console.log(payload, 'payload')
 
       const response = await apiClient.post('/order/now', payload);
       store.dispatch(setLoading(true));
@@ -176,12 +179,12 @@ export const orderService = {
       const errorMessage = error;
       const errors = error.response.data.errors;
 
-      console.log(error.response.data, 'qwerty')
+      console.log(error.response.data, 'qwerty');
 
-      console.warn('errorMessage', errorMessage)
+      console.warn('errorMessage', errorMessage);
       for (const key in errors) {
         if (Object.hasOwnProperty.call(errors, key)) {
-          console.log('error', key, errors[key][0])
+          console.log('error', key, errors[key][0]);
         }
       }
 
