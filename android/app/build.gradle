@@ -81,7 +81,7 @@ android {
         applicationId "com.app.free99"
         minSdkVersion 23
         targetSdkVersion 34
-        versionCode 2
+        versionCode 3
         versionName "1.1"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary true
