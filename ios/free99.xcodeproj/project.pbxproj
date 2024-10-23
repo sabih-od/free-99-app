@@ -519,7 +519,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = free99/free99.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = R6U34AT6G6;
+				DEVELOPMENT_TEAM = XUF28QH3Q7;
 				ENABLE_BITCODE = NO;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
 				INFOPLIST_FILE = free99/Info.plist;
@@ -554,7 +554,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = free99/free99.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = R6U34AT6G6;
+				DEVELOPMENT_TEAM = XUF28QH3Q7;
 				INFOPLIST_FILE = free99/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Free 99";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";

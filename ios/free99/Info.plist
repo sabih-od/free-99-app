@@ -33,19 +33,18 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Free99 needs access to Apple Music data</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Please grant permission for Free99US to access your camera in order to capture a profile picture.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Free99 needs access to the user's location when the app is in use</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Free99 needs access to the microphone</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Please allow Free99US to access to your photo library to save images.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Please grant permission for Free99US to access your photo library, allowing the selection and upload of a desired image as your profile picture.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Free99 needs access to the microphone</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>Free99 needs access to Apple Music data</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Free99 needs access to the user's location when the app is in use</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>FreightBigPro-Bold.ttf</string>
@@ -55,6 +54,7 @@
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>

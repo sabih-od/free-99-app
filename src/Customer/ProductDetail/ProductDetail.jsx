@@ -56,6 +56,7 @@ import {ImageGallery} from '@georstat/react-native-image-gallery';
 import {ImageZoom, ZOOM_TYPE} from '@likashefqet/react-native-image-zoom';
 import CustomInput from '../../Components/CustomInput/CustomInput';
 import axios from 'axios';
+import ImageModal from '../../Components/ImageModal';
 
 const LoadingSkeleton = () => {
   const [opacity] = useState(new Animated.Value(0.3));
@@ -147,7 +148,7 @@ const LoadingSkeleton = () => {
 };
 
 const ProductDetail = ({navigation, route}) => {
-  const id = route.params.id;
+  const {id} = route.params;
   const [item, setItem] = useState();
   const isAuth = useSelector(state => state.auth.isAuthenticated);
   const authData = useSelector(state => state.auth.data);
@@ -156,7 +157,7 @@ const ProductDetail = ({navigation, route}) => {
   const [prodLoading, setProdLoading] = useState();
   const [wishlistLoading, setWishlistLoading] = useState();
   const cartLoading = useSelector(state => state.cart.loading);
-
+  const [img, setImg] = useState(null);
   const [bestOfferModalVisible, setBestOfferModalVisible] = useState(false);
   const [bestOfferLoading, setBestOfferLoading] = useState(false);
   const token = useSelector(state => state.auth.token);
@@ -324,17 +325,18 @@ const ProductDetail = ({navigation, route}) => {
   };
 
   const [isVisible, setIsVisible] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // const [currentIndex, setCurrentIndex] = useState(0);
   const imageZoomRef = useRef(null);
 
   const openImage = index => {
-    setCurrentIndex(index);
+    // setCurrentIndex(index);
+    setImg(index.image);
     setIsVisible(true);
   };
 
   const closeImageZoom = () => {
     setIsVisible(false);
-    setCurrentIndex(0);
+    // setCurrentIndex(0);
   };
 
   const fetchProduct = useCallback(async () => {
@@ -452,7 +454,9 @@ const ProductDetail = ({navigation, route}) => {
     [disableBtn, isAuth, navigation],
   );
 
-  const galleryImages = item?.media[currentIndex]?.image;
+  // const galleryImages = currentIndex => setImg(item?.media[currentIndex]?.image);
+
+  // console.log('-->', img);
 
   return (
     <View style={{backgroundColor: bgColor, flex: 1}}>
@@ -493,7 +497,7 @@ const ProductDetail = ({navigation, route}) => {
                   renderItem={({item: imgItem, index}) => (
                     <TouchableOpacity
                       activeOpacity={0.8}
-                      onPress={() => openImage(index)}>
+                      onPress={() => openImage(imgItem)}>
                       <ImageBackground
                         key={index}
                         source={{uri: imgItem.image}}
@@ -502,11 +506,9 @@ const ProductDetail = ({navigation, route}) => {
                           {alignItems: 'center', justifyContent: 'center'},
                         ]}>
                         {disableBtn && (
-                          <View style={styles.outOfStockOverlay}>
-                            <Text style={styles.outofstocktext}>
-                              Item is out of Stock.
-                            </Text>
-                          </View>
+                          <Text style={styles.outofstocktext}>
+                            Item is out of Stock.
+                          </Text>
                         )}
                       </ImageBackground>
                     </TouchableOpacity>
@@ -515,7 +517,7 @@ const ProductDetail = ({navigation, route}) => {
               ) : (
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => openImage(0)}>
+                  onPress={() => openImage(item?.media[0])}>
                   <ImageBackground
                     source={{uri: item?.media[0].image}}
                     style={[
@@ -523,80 +525,31 @@ const ProductDetail = ({navigation, route}) => {
                       {alignItems: 'center', justifyContent: 'center'},
                     ]}>
                     {disableBtn && (
-                      <View style={styles.outOfStockOverlay}>
-                        <Text style={styles.outofstocktext}>
-                          Item is out of Stock.
-                        </Text>
-                      </View>
+                      <Text style={styles.outofstocktext}>
+                        Item is out of Stock.
+                      </Text>
                     )}
                   </ImageBackground>
                 </TouchableOpacity>
               )}
               {isVisible && (
-                <Modal
-                  visible={isVisible}
-                  transparent={true}
-                  onRequestClose={closeImageZoom}>
-                  <View
-                    style={{
-                      flex: 1,
-                      backgroundColor: 'black',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}>
-                    <ImageZoom
-                      ref={imageZoomRef}
-                      uri={galleryImages}
-                      minScale={0.5}
-                      maxScale={5}
-                      doubleTapScale={3}
-                      minPanPointers={1}
-                      isDoubleTapEnabled
-                      onDoubleTap={zoomType => {
-                        console.log('onDoubleTap', zoomType);
-                        if (zoomType === ZOOM_TYPE.ZOOM_IN) {
-                          setTimeout(() => {
-                            imageZoomRef.current?.reset();
-                          }, 3000);
-                        }
-                      }}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                      }}
-                      resizeMode="contain"
-                    />
-                    <TouchableOpacity
-                      onPress={closeImageZoom}
-                      style={{
-                        position: 'absolute',
-                        top: 40,
-                        right: 20,
-                        backgroundColor: 'rgba(0,0,0,0.5)',
-                        borderRadius: 50,
-                        padding: 10,
-                      }}>
-                      <Text
-                        style={{
-                          color: '#fff',
-                          fontSize: 18,
-                        }}>
-                        Close
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </Modal>
+                <ImageModal
+                  isVisible={isVisible}
+                  closeImageZoom={closeImageZoom}
+                  imageZoomRef={imageZoomRef}
+                  img={img}
+                />
               )}
               {/* {isVisible && (
-                    <ImageViewing
-                        images={item?.media?.map(mediaItem => ({ uri: mediaItem?.image }))}
-                        imageIndex={currentIndex}
-                        visible={isVisible}
-                        onRequestClose={() => setIsVisible(false)}
-                        doubleTapToZoomEnabled={true}
-                        swipeToCloseEnabled={true}
-                    />
-                )} */}
+                <ImageViewing
+                  images={item?.media?.map(mediaItem => ({ uri: mediaItem?.image }))}
+                  imageIndex={currentIndex}
+                  visible={isVisible}
+                  onRequestClose={() => setIsVisible(false)}
+                  doubleTapToZoomEnabled={true}
+                  swipeToCloseEnabled={true}
+                />
+              )} */}
             </View>
             <View style={[GlobalStyle.container, {height: '100%'}]}>
               <View
@@ -806,12 +759,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: 'rgba(0, 0, 0, 0.25)',
   },
-  quantity: {
-    fontSize: generalFontSize - 4,
-    color: bgColor,
-    ...fontFamily('regular'),
-    lineHeight: 25,
-  },
+  // quantity: {
+  //   fontSize: generalFontSize - 4,
+  //   color: bgColor,
+  //   ...fontFamily('regular'),
+  //   lineHeight: 25,
+  // },
   // overlayModal: {
   //     position: 'absolute',
   //     bottom: 0,
