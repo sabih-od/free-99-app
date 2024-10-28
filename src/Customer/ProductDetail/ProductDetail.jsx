@@ -462,6 +462,13 @@ const ProductDetail = ({navigation, route}) => {
     <View style={{backgroundColor: bgColor, flex: 1}}>
       {prodLoading ? (
         <LoadingSkeleton />
+      ) : isVisible ? (
+        <ImageModal
+          isVisible={isVisible}
+          closeImageZoom={closeImageZoom}
+          imageZoomRef={imageZoomRef}
+          img={img}
+        />
       ) : (
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -532,14 +539,14 @@ const ProductDetail = ({navigation, route}) => {
                   </ImageBackground>
                 </TouchableOpacity>
               )}
-              {isVisible && (
+              {/* {isVisible && (
                 <ImageModal
                   isVisible={isVisible}
                   closeImageZoom={closeImageZoom}
                   imageZoomRef={imageZoomRef}
                   img={img}
                 />
-              )}
+              )} */}
               {/* {isVisible && (
                 <ImageViewing
                   images={item?.media?.map(mediaItem => ({ uri: mediaItem?.image }))}
