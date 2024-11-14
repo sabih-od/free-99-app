@@ -642,7 +642,11 @@ const VendorAddProduct = ({navigation}) => {
                           placeholderTextColor={'#707070'}
                           keyboardType="numeric"
                           onBlur={onBlur}
-                          onChangeText={onChange}
+                          onChangeText={text => {
+                            // Only allow integer values (no decimals)
+                            const integerValue = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                            onChange(integerValue); // Update the form state with the new value
+                          }}
                           value={value}
                         />
                       )}

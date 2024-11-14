@@ -54,7 +54,7 @@ const ImageCarousel = () => {
             {index === 0 ? (
               <View style={{paddingLeft: 20, paddingTop: 20}}>
                 <Text style={{fontSize: 20, color: '#fff', fontWeight: '700'}}>
-                  Free99
+                  free99
                 </Text>
                 <View
                   style={{
