@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TouchableHighlight,
   ImageBackground,
+  Image,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import Carousel from 'react-native-reanimated-carousel';
@@ -53,9 +54,17 @@ const ImageCarousel = () => {
             style={[styles.imageStyle, {borderRadius: 5}]}>
             {index === 0 ? (
               <View style={{paddingLeft: 20, paddingTop: 20}}>
-                <Text style={{fontSize: 20, color: '#fff', fontWeight: '700'}}>
+                {/* <Text style={{fontSize: 20, color: '#fff', fontWeight: '700'}}>
                   free99
-                </Text>
+                </Text> */}
+                <Image
+                  source={require('../../../assets/images/free99logo.png')}
+                  style={{
+                    resizeMode: 'contain',
+                    width: windowWidth * 0.3,
+                    height: windowWidth * 0.2,
+                  }}
+                />
                 <View
                   style={{
                     backgroundColor: themeColor,
@@ -63,7 +72,7 @@ const ImageCarousel = () => {
                     width: 150,
                     borderRadius: 10,
                     alignItems: 'flex-end',
-                    marginTop: 50,
+                    marginTop: 30,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}>
