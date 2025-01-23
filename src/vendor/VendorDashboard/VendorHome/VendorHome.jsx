@@ -27,7 +27,6 @@ const VendorHome = ({ navigation }) => {
         setRefreshing(false);
     }
 
-
     useEffect(() => {
 
         const fetchData = async () => {

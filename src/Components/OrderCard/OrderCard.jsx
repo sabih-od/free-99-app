@@ -36,8 +36,6 @@ const OrderCard = ({ isReview, review, addReview, item }) => {
         setModalVisible(!modalVisible)
     }
 
-    console.log("Product=> ", product)
-
     return (
         <>
             <View style={[styles.orderCard, addReview && { borderRadius: 0, borderTopLeftRadius: 10, borderTopRightRadius: 10 }]}>
@@ -102,6 +100,7 @@ const OrderCard = ({ isReview, review, addReview, item }) => {
 const OrderMinCard = ({ item, selectData }) => {
     const navigation = useNavigation();
     return (
+        <View style={styles.main}>
         <View style={GlobalStyle.orderBox}>
             <View style={GlobalStyle.orderContent}>
                 <Text style={GlobalStyle.orderMainText}>{item.order_number}</Text>
@@ -127,6 +126,14 @@ const OrderMinCard = ({ item, selectData }) => {
                 </TouchableOpacity>
             </View>
         </View>
+                <Text style={GlobalStyle.orderMinText}>Products</Text>
+                {item?.details?.map(val=>(
+                        <View key={val?.id} style={[GlobalStyle.row, GlobalStyle.ac]}>
+                            <Text style={GlobalStyle.orderMainText}>{val?.product.name}</Text>
+                            <Image source={{uri:val?.product?.image}} style={styles.image}/>
+                        </View>
+                    ))}
+            </View>
     );
 };
 
@@ -134,6 +141,10 @@ export { OrderCard, OrderMinCard };
 
 // Styles for OrderCard component
 const styles = StyleSheet.create({
+    main:{
+        backgroundColor: itemBg,
+        borderRadius:10
+    },
     image: {
         width: 74,
         height: 74,
