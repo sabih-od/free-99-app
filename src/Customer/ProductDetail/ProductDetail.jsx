@@ -57,6 +57,7 @@ import {ImageZoom, ZOOM_TYPE} from '@likashefqet/react-native-image-zoom';
 import CustomInput from '../../Components/CustomInput/CustomInput';
 import axios from 'axios';
 import ImageModal from '../../Components/ImageModal';
+import { BASE_URL } from '../../Constants';
 
 const LoadingSkeleton = () => {
   const [opacity] = useState(new Animated.Value(0.3));
@@ -184,7 +185,8 @@ const ProductDetail = ({navigation, route}) => {
       try {
         const response = await axios.post(
           // 'https://dev.free99us.com/api/product/best/offer',
-          'https://free99us.com/api/product/best/offer',
+          // 'https://free99us.com/api/product/best/offer',
+          `${BASE_URL}/product/best/offer`,
           formData,
           {headers},
         );
@@ -457,6 +459,10 @@ const ProductDetail = ({navigation, route}) => {
   // const galleryImages = currentIndex => setImg(item?.media[currentIndex]?.image);
 
   // console.log('-->', img);
+
+  useEffect(() => {
+    console.log('item', item?.media)
+  }, [item]);
 
   return (
     <View style={{backgroundColor: bgColor, flex: 1}}>

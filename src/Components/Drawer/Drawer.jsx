@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { authService } from '../../Services/authService';
 import { useSelector } from 'react-redux';
 import NotiModal from '../NotiModal/NotiModal';
+import SocialLinks from '../SocialLinks/SocialLinks';
 
 const navigations = [
     {
@@ -124,6 +125,9 @@ const DrawerComp = ({ isCustomer }) => {
                     />
                 )}
             </View>
+
+            <SocialLinks />
+
             <View style={styles.overlayModal}>
                 {isVendor && (
                     <TouchableOpacity
@@ -131,7 +135,7 @@ const DrawerComp = ({ isCustomer }) => {
                         style={[GlobalStyle.themeBtn, { width: '100%' }]}
                     >
                         <Text style={GlobalStyle.themeBtnText}>
-                            {isCustomer ? 'Switch to Vendor' : 'Switch to Cusomter'}
+                            {isCustomer ? 'Switch to Vendor' : 'Switch to Customer'}
                         </Text>
                     </TouchableOpacity>
                 )}

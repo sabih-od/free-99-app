@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { authService } from '../../../Services/authService';
 import NotiModal from '../../../Components/NotiModal/NotiModal';
+import SocialLinks from '../../../Components/SocialLinks/SocialLinks';
 const Profile = () => {
 
   const userInfo = useSelector((state) => state.auth.data)
@@ -80,6 +81,13 @@ const Profile = () => {
             </TouchableOpacity>
           )}
         />
+
+        <View style={{
+          marginBottom: 25
+        }}>
+          <SocialLinks />
+        </View>
+
         <View style={[GlobalStyle.row, GlobalStyle.aic, { gap: 10, marginBottom: 10 }]}>
           {isVendor && (
             <TouchableOpacity

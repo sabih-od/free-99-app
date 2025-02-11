@@ -168,6 +168,9 @@ export const productService = {
         }
     },
         removeGalleryImages: async (productId, imageId) => {
+            console.log('productId, imageId', productId, imageId);
+
+            
             store.dispatch(setLoading(true));
             try {
                 const response = await apiClient.delete(`/product/gallery-image/${productId}/${imageId}`);

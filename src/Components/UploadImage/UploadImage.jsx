@@ -19,6 +19,7 @@ import {
   windowWidth,
 } from '../../Styles/Theme';
 import Carousel from 'react-native-reanimated-carousel';
+import { APP_URL } from '../../Constants';
 
 const defaultImage =
   'https://t4.ftcdn.net/jpg/02/51/95/53/360_F_251955356_FAQH0U1y1TZw3ZcdPGybwUkH90a3VAhb.jpg';
@@ -33,7 +34,12 @@ const UploadImage = ({
   imageIds,
   setPhotos,
 }) => {
-  const handleDelete = index => {
+  
+  useEffect(() => {
+    console.log('photos', photos);
+  }, [photos]);
+
+  const handleDelete = item => {
     Alert.alert(
       'Delete Image',
       'Are you sure you want to delete this image?',
@@ -42,9 +48,11 @@ const UploadImage = ({
         {
           text: 'OK',
           onPress: async () => {
-            const imageId = imageIds[index];
-            deleteImage(productId, imageId);
-            setPhotos(prevPhotos => prevPhotos.filter((_, i) => i !== index));
+            // const imageId = imageIds[index];
+            // deleteImage(productId, imageId);
+
+            deleteImage(productId, item?.id);
+            setPhotos(prevPhotos => prevPhotos.filter(x => x?.id !== item?.id));
           },
         },
       ],
@@ -56,59 +64,53 @@ const UploadImage = ({
   return (
     <>
       <View style={[GlobalStyle.card, {marginTop: 10}]}>
-        {photos.length > 1 ? (
-          <Carousel
-            // autoPlay
-            loop
-            data={imageData}
-            height={windowWidth / 1.75}
-            width={Dimensions.get('window').width - 60}
-            scrollAnimationDuration={2000}
-            renderItem={({item, index}) => (
-              <ImageBackground
-                style={styles.mainImg}
-                imageStyle={{
-                  resizeMode: 'cover',
-                  borderRadius: 10,
-                  borderWidth: 1,
-                  borderColor: textColor,
-                }}
-                source={
-                  Platform.OS == 'ios'
-                    ? {uri: item?.sourceURL}
-                    : {uri: item.path}
-                }>
-                {/* <View style={{ position: 'absolute', bottom: 10, left: (Dimensions.get('window').width - 80) / 2 }}>
-                        <Text style={{ textAlign: 'center', fontSize: 30, color: 'white' }}>
-                            {index + 1}
-                        </Text>
-                    </View> */}
-                {deleteButton && (
-                  <View
-                    style={{
-                      marginTop: 10,
-                      marginRight: 10,
-                      alignItems: 'flex-end',
-                    }}>
-                    <TouchableOpacity onPress={() => handleDelete(index)}>
-                      <Image
-                        style={{
-                          height: 30,
-                          width: 30,
-                          resizeMode: 'contain',
-                          tintColor: 'red',
-                          backgroundColor: 'white',
-                          borderRadius: 15,
-                        }}
-                        source={require('./../../../assets/images/delete.png')}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </ImageBackground>
-            )}
-          />
-        ) : photos.length === 0 ? (
+        {
+          photos.length > 0 ? (
+            <Carousel
+              // autoPlay
+              loop
+              data={imageData}
+              height={windowWidth / 1.75}
+              width={Dimensions.get('window').width - 60}
+              scrollAnimationDuration={2000}
+              renderItem={({item, index}) => (
+                <ImageBackground
+                  style={styles.mainImg}
+                  imageStyle={{
+                    resizeMode: 'cover',
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    borderColor: textColor,
+                  }}
+                  source={{uri: item?.sourceURL}}
+                >
+                  {deleteButton && (
+                    <View
+                      style={{
+                        marginTop: 10,
+                        marginRight: 10,
+                        alignItems: 'flex-end',
+                      }}>
+                      <TouchableOpacity onPress={() => handleDelete(item)}>
+                        <Image
+                          style={{
+                            height: 30,
+                            width: 30,
+                            resizeMode: 'contain',
+                            tintColor: 'red',
+                            backgroundColor: 'white',
+                            borderRadius: 15,
+                          }}
+                          source={require('./../../../assets/images/delete.png')}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </ImageBackground>
+              )}
+            />
+          ) : 
+          
           <Image
             style={[
               styles.mainImg,
@@ -121,35 +123,7 @@ const UploadImage = ({
             ]}
             source={{uri: defaultImage}}
           />
-        ) : (
-          <ImageBackground
-            style={styles.mainImg}
-            imageStyle={{
-              resizeMode: 'cover',
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: textColor,
-            }}
-            source={
-              Platform.OS == 'ios'
-                ? {uri: imageData[0]?.sourceURL}
-                : {uri: imageData[0]?.path}
-            }>
-            {/* {deleteButton &&
-                <View style={{
-                    marginTop: 10,
-                    marginRight: 10,
-                    alignItems: 'flex-end'
-                }}>
-                    <TouchableOpacity
-                        onPress={deleteImage}
-                    >
-                        <Image style={{ height: 30, width: 30, resizeMode: 'contain', tintColor: 'red', backgroundColor: 'white', borderRadius: 15 }} source={require('./../../../assets/images/delete.png')} />
-                    </TouchableOpacity>
-                </View>
-            } */}
-          </ImageBackground>
-        )}
+        }
         <View style={[GlobalStyle.row, GlobalStyle.aic, {gap: 10}]}>
           {/* {deleteButton &&
                 <TouchableOpacity

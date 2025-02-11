@@ -15,12 +15,14 @@ import NotiModal from '../../../Components/NotiModal/NotiModal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { errorToast, successToast } from '../../../Utils/toast';
+import { APP_URL } from '../../../Constants';
 
 const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) => {
+    const {token} = useSelector((state) => state.auth);
     const category = useSelector((state) => state.shop.category);
     const image_id = updateProduct?.media?.map((item) => item?.id)
     const product_id = updateProduct?.id
-    console.log('category', category)
+
     const loading = useSelector((state) => state.auth.loading);
     const [photos, setPhotos] = useState([]);
     const [featuredImage, setFeaturedImage] = useState(null);
@@ -38,6 +40,10 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
     const scrollViewRef = useRef();
 
     const { control, handleSubmit, formState: { errors }, setValue, reset } = useForm();
+
+    useEffect(() => {
+        console.log('token', token)
+    }, [token]);
 
     const renderItem = item => {
         return (
@@ -115,10 +121,12 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
     // }
 
     const deleteImage = (productId, imageId) => {
+        console.log('productId, imageId', productId, imageId);
+
         productService.removeGalleryImages(productId, imageId)
             .then(() => {
                 setPhotos((prevPhotos) => prevPhotos.filter(photo => photo?.id !== imageId));
-                alert('Image Deleted')
+                Alert.alert('Image Deleted')
                 productService.getProducts();
                 // handle success, e.g., update state to remove the deleted image from the UI
             })
@@ -295,25 +303,25 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
             setIsFeatured(updateProduct.featured == 1);
             setIsSale(updateProduct.sale == 1);
             setIsFavourites(updateProduct.favourites == 1);
-            console.log('dchbcbdhbc', updateProduct?.media)
+            
             if (updateProduct.media.length > 0) {
-                const mediaImages = updateProduct.media.map((item) => {
-                    return (
-                        {
-                            sourceURL: `https://free99us.com/storage/${item?.id}/${item?.file_name}`,
-                            type: item?.mine_type,
-                            name: item?.file_name
-                        }
-                    )
-                })
+                const mediaImages = updateProduct.media.filter(item => item?.collection_name === 'product_gallery')
+                                        .map(item => ({
+                                            id: item?.id,
+                                            sourceURL: `${APP_URL}/storage/${item?.id}/${item?.file_name}`,
+                                            type: item?.mine_type,
+                                            name: item?.file_name
+                                        }));
+                setPhotos(mediaImages)
+                
                 //     setPhotos(updateProduct.image.map(image => ({
                 //         uri: image,
                 //         type: 'image/jpeg',
                 //         name: image.split('/').pop()
                 //     })));
-                setPhotos(mediaImages)
             }
 
+            // set featured image
             setFeaturedImage(
                 {
                     path: updateProduct.image,
