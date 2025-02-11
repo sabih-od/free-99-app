@@ -160,9 +160,176 @@ const ProductDetail = ({navigation, route}) => {
   const cartLoading = useSelector(state => state.cart.loading);
   const [img, setImg] = useState(null);
   const [bestOfferModalVisible, setBestOfferModalVisible] = useState(false);
+  const [productFeedbackModalVisible, setProductFeedbackVisble] =
+    useState(false);
+  const [productFeedbackLoading, setProductFeedbackLoading] = useState(false);
   const [bestOfferLoading, setBestOfferLoading] = useState(false);
   const token = useSelector(state => state.auth.token);
 
+  const ProductFeedbackModal = () => {
+    const [feedback, setFeedack] = useState('');
+    const submitFeedback = async () => {
+      if (!feedback) {
+        return Alert.alert('Error', 'Please enter a feedback.');
+      }
+      setProductFeedbackLoading(true);
+
+      // Set up form data
+      const formData = new FormData();
+      formData.append('product_id', id);
+      formData.append('feedback', feedback);
+
+      // Set up headers
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      try {
+        const response = await axios.post(
+          // 'https://dev.free99us.com/api/product/best/offer',
+          'https://free99us.com/api/product-feedback',
+          formData,
+          {headers},
+        );
+
+        // Handle success response
+        successToast(response.data.message);
+        setProductFeedbackVisble(false);
+        setFeedack('');
+      } catch (error) {
+        // Handle error response
+        errorToast('Failed to submit feedback. Please try again.');
+        console.error('Error submitting feedback:', error);
+      } finally {
+        setProductFeedbackLoading(false);
+      }
+    };
+    return (
+      <Modal
+        avoidKeyboard={true}
+        visible={productFeedbackModalVisible}
+        transparent={true}
+        onRequestClose={() => setProductFeedbackVisble(false)}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'transparent',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <View
+            style={{
+              width: Dimensions.get('window').width - 40,
+              height: 220,
+              backgroundColor: 'white',
+              borderRadius: 10,
+              justifyContent: 'center',
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginHorizontal: 20,
+              }}>
+              <Text
+                style={{
+                  color: blackColor,
+                  fontSize: generalFontSize + 5,
+                  ...fontFamily('regular'),
+                }}>
+                Enter Your Feedback
+              </Text>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setProductFeedbackVisble(false)}>
+                <Image
+                  source={require('../../../assets/images/close.png')}
+                  style={{
+                    height: 30,
+                    width: 30,
+                    resizeMode: 'contain',
+                    tintColor: blackColor,
+                  }}
+                />
+              </TouchableOpacity>
+            </View>
+            <View
+              style={{
+                width: Dimensions.get('window').width - 80,
+                height: 55,
+                alignSelf: 'center',
+                borderRadius: 10,
+                marginTop: 20,
+                borderColor: 'black',
+                borderWidth: 1,
+              }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  flex: 1,
+                  marginHorizontal: 20,
+                }}>
+                <Text
+                  style={{
+                    color: blackColor,
+                    fontSize: generalFontSize,
+                    ...fontFamily('regular'),
+                  }}>
+                  
+                </Text>
+                <TextInput
+                  keyboardType="string"
+                  style={{
+                    color: blackColor,
+                    flex: 1, 
+                    marginLeft: 5,
+                    fontSize: generalFontSize,
+                    ...fontFamily('regular'),
+                  }}
+                  placeholder="Enter Your Feedback"
+                  placeholderTextColor={'grey'}
+                  value={feedback}
+                  onChangeText={setFeedack}
+                />
+              </View>
+            </View>
+            <TouchableOpacity
+              onPress={submitFeedback}
+              style={{
+                backgroundColor: themeColor,
+                height: 55,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: 20,
+                width: Dimensions.get('window').width - 80,
+                borderRadius: 10,
+                alignSelf: 'center',
+              }}
+              disabled={productFeedbackLoading}>
+              {productFeedbackLoading ? (
+                <ActivityIndicator color={whiteColor} size={'small'} />
+              ) : (
+                <Text
+                  style={{
+                    color: whiteColor,
+                    fontSize: generalFontSize + 5,
+                    fontFamily: 'FreightBigPro-Bold',
+                  }}>
+                  SUBMIT
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+
+
+
+    );
+  }
   const BestOfferModal = () => {
     const [bestOfferPrice, setBestOfferPrice] = useState('');
     const submitBestOffer = async () => {
@@ -323,6 +490,10 @@ const ProductDetail = ({navigation, route}) => {
           </View>
         </View>
       </Modal>
+
+
+
+
     );
   };
 
@@ -721,6 +892,50 @@ const ProductDetail = ({navigation, route}) => {
                   <ProductRating key={review.id} review={review} />
                 ))}
               </View>
+
+              <View style={padding('bottom', 10)}>
+              <TouchableOpacity
+                  disabled={disableBtn}
+                  onPress={() => {
+                    if (
+                      route?.params?.data?.user_id ===
+                      authData?.user_subscription?.user_id
+                    ) {
+                      return Alert.alert(
+                        'You cannot give feedback to your own product',
+                      );
+                    }
+                    isAuth
+                      ? setProductFeedbackVisble(true)
+                      : Alert.alert(
+                          'Login Required',
+                          'You need to Login to add feeback',
+                          [
+                            {text: 'cancel'},
+                            {
+                              text: 'login',
+                              onPress: () => navigation.navigate('login'),
+                            },
+                          ],
+                        );
+                  }}
+                  style={[
+                    GlobalStyle.themeBtn,
+                    {
+                      flex: 1,
+                      backgroundColor: disableBtn ? '#ddd' : themeColor,
+                    },
+                  ]}>
+                  <Text
+                    style={[
+                      GlobalStyle.themeBtnText,
+                      {color: disableBtn ? blackColor : whiteColor},
+                    ]}>
+                    Product Feedback
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <ProductFeedbackModal />
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
