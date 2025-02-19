@@ -34,10 +34,6 @@ const UploadImage = ({
   imageIds,
   setPhotos,
 }) => {
-  
-  useEffect(() => {
-    console.log('photos', photos);
-  }, [photos]);
 
   const handleDelete = item => {
     Alert.alert(

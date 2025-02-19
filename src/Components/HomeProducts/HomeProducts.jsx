@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, View, ActivityIndicator, Animated } from 'react-native';
+import { FlatList, StyleSheet, Text, View, ActivityIndicator, Animated, ScrollView } from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { GlobalStyle, isIpad, textColor, whiteColor, windowWidth } from '../../Styles/Theme';
 import Product from '../Product/Product';
@@ -88,33 +88,67 @@ const HomeProducts = () => {
     };
 
     return (
+        // <View style={{ flex: 1 }}>
+        //     {data.length ? (
+        //         <FlatList
+        //             data={data}
+        //             showsVerticalScrollIndicator={false}
+        //             showsHorizontalScrollIndicator={false}
+        //             contentContainerStyle={{ gap: 20, paddingBottom: 20 }}
+        //             columnWrapperStyle={{ justifyContent: 'space-between', flexDirection: 'row', flexWrap: 'wrap' }}
+        //             keyExtractor={item => item.id.toString()} // KeyExtractor expects a string
+        //             horizontal={false}
+        //             numColumns={isIpad ? 3 : 2}
+        //             renderItem={({ item, index }) => (
+        //                 <Product
+        //                     width={isIpad ? (windowWidth - 60) / 3 : (windowWidth - 60) / 2}
+        //                     height={isIpad ? windowWidth / 3 : windowWidth / 2}
+        //                     item={item}
+        //                     key={index}
+        //                 />
+        //             )}
+        //             onEndReached={handleLoadMore}
+        //             onEndReachedThreshold={0.5}
+        //             ListFooterComponent={renderFooter}
+        //         />
+        //     ) : (
+        //         <LoadingSkeleton />
+        //     )}
+        // </View>
+
         <View style={{ flex: 1 }}>
             {data.length ? (
-                <FlatList
-                    data={data}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ gap: 20, paddingBottom: 20 }}
-                    columnWrapperStyle={{ justifyContent: 'space-between', flexDirection: 'row', flexWrap: 'wrap' }}
-                    keyExtractor={item => item.id.toString()} // KeyExtractor expects a string
-                    horizontal={false}
-                    numColumns={isIpad ? 3 : 2}
-                    renderItem={({ item, index }) => (
-                        <Product
-                            width={isIpad ? (windowWidth - 60) / 3 : (windowWidth - 60) / 2}
-                            height={isIpad ? windowWidth / 3 : windowWidth / 2}
-                            item={item}
-                            key={index}
-                        />
-                    )}
-                    onEndReached={handleLoadMore}
-                    onEndReachedThreshold={0.5}
-                    ListFooterComponent={renderFooter}
-                />
+                <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    gap: 20,
+                    paddingBottom: 20,
+                }}
+                >
+                {data.map((item, index) => (
+                    <View
+                    key={item.id.toString()} // KeyExtractor expects a string, so use the unique ID
+                    style={{
+                        width: isIpad ? (windowWidth - 60) / 3 : (windowWidth - 60) / 2,
+                        marginBottom: 20,
+                    }}
+                    >
+                    <Product
+                        width={isIpad ? (windowWidth - 60) / 3 : (windowWidth - 60) / 2}
+                        height={isIpad ? windowWidth / 3 : windowWidth / 2}
+                        item={item}
+                        key={index}
+                    />
+                    </View>
+                ))}
+                </ScrollView>
             ) : (
                 <LoadingSkeleton />
             )}
         </View>
+
     );
 }
 

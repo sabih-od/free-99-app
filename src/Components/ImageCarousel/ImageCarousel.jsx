@@ -26,7 +26,6 @@ const ImageCarousel = () => {
   // const fetchImages = useCallback(async () => {
   //     const res = await bannerService.getBanners();
   //     setImages(res?.data)
-  //     console.log(images)
   // }, []);
 
   // useEffect(() => {

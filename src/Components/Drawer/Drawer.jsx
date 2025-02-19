@@ -50,6 +50,10 @@ const vendorNavigations = [
     {
         name: "Settings",
         url: 'vendorSettings'
+    },
+    {
+        name: "Chat",
+        url: 'vendorChat'
     }
     // Add more vendor-specific navigation items as needed
 ];

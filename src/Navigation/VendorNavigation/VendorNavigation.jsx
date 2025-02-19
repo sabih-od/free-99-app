@@ -12,6 +12,7 @@ import VendorPayment from '../../vendor/VendorPayment/VendorPayment';
 import VendorWallet from '../../vendor/VendorWallet/VendorWallet';
 import VendorTransaction from '../../vendor/VendorTransaction/VendorTransaction';
 import Customer from '../../Customer/Customer';
+import VendorChat from '../../vendor/VendorChat/VendorChat';
 
 const VendorNavigation = () => {
     const navigation = useNavigation()
@@ -33,6 +34,7 @@ const VendorNavigation = () => {
             <Drawer.Screen name="vendorWallet" component={VendorWallet} />
             <Drawer.Screen name="vendorTransaction" component={VendorTransaction} />
             <Drawer.Screen name="customer" component={Customer} options={{ headerShown: false }} />
+            <Drawer.Screen name="vendorChat" component={VendorChat} />
         </Drawer.Navigator>
     )
 }

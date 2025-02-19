@@ -7,6 +7,7 @@ import {
   RefreshControl,
   FlatList,
   Animated,
+  Alert,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
@@ -32,6 +33,7 @@ import {wishlistService} from '../../../Services/wishlistService';
 import {logout} from '../../../Redux/Store/Slices/Auth';
 import {store} from '../../../Redux/Store';
 import {useSelector} from 'react-redux';
+import { Pusher } from '@pusher/pusher-websocket-react-native';
 
 const LoadingSkeleton = () => {
   const numSkeletonItems = 2; // Number of skeleton items to show
@@ -137,8 +139,7 @@ const Home = ({navigation}) => {
   }, [authData]);
 
   return (
-    <SafeAreaView style={{backgroundColor: bgColor, flex: 1}}>
-      <ScrollView
+    <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -146,77 +147,92 @@ const Home = ({navigation}) => {
             tintColor={whiteColor}
             onRefresh={onRefresh}
           />
-        }>
-        <View style={padding('bottom', 20)}>
-          <ImageCarousel />
+        }
+        style={{backgroundColor: bgColor, flex: 1}}
+      >
+      <View style={padding('bottom', 20)}>
+        <ImageCarousel />
+      </View>
+      <View style={[GlobalStyle.container, padding('top', 15)]}>
+        <View style={[GlobalStyle.borderContainer]}>
+          <Categories catTitle={'Explore Popular Categories'} />
         </View>
-        <View style={[GlobalStyle.container, padding('top', 15)]}>
-          <View style={[GlobalStyle.borderContainer]}>
-            <Categories catTitle={'Explore Popular Categories'} />
-          </View>
-          {/* <FeaturedSec featureTitle={"Explore Popular Categories"} /> */}
-          <View style={[GlobalStyle.borderContainer]}>
-            <FeatureBanner
-              img={require('../../../../assets/images/featureBanner.png')}
-              title={'Ready-Set-Summer'}
+        {/* <FeaturedSec featureTitle={"Explore Popular Categories"} /> */}
+        <View style={[GlobalStyle.borderContainer]}>
+          <FeatureBanner
+            img={require('../../../../assets/images/featureBanner.png')}
+            title={'Ready-Set-Summer'}
+          />
+        </View>
+        <View>
+          <Text
+            style={{
+              fontFamily: 'FreightBigPro-Bold',
+              fontSize: generalFontSize + 8,
+              fontWeight: '900',
+              marginBottom: 20,
+              color: textColor,
+            }}>
+            Featured Products
+          </Text>
+          {/* {data?.length ? (
+            <FlatList
+              data={data}
+              showsVerticalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{gap: 20, paddingBottom: 20}}
+              columnWrapperStyle={{
+                justifyContent: 'space-between',
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+              }}
+              keyExtractor={item => item.id.toString()} // KeyExtractor expects a string
+              horizontal={false}
+              numColumns={isIpad ? 3 : 2}
+              renderItem={({item, index}) => (
+                <Product
+                  width={
+                    isIpad ? (windowWidth - 60) / 3 : (windowWidth - 60) / 2
+                  }
+                  height={isIpad ? windowWidth / 3 : windowWidth / 2}
+                  item={item}
+                  key={index}
+                />
+              )}
             />
-          </View>
-          <View>
-            <Text
-              style={{
-                fontFamily: 'FreightBigPro-Bold',
-                fontSize: generalFontSize + 8,
-                fontWeight: '900',
-                marginBottom: 20,
-                color: textColor,
-              }}>
-              Featured Products
-            </Text>
-            {data?.length ? (
-              <FlatList
-                data={data}
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{gap: 20, paddingBottom: 20}}
-                columnWrapperStyle={{
-                  justifyContent: 'space-between',
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                }}
-                keyExtractor={item => item.id.toString()} // KeyExtractor expects a string
-                horizontal={false}
-                numColumns={isIpad ? 3 : 2}
-                renderItem={({item, index}) => (
-                  <Product
-                    width={
-                      isIpad ? (windowWidth - 60) / 3 : (windowWidth - 60) / 2
-                    }
-                    height={isIpad ? windowWidth / 3 : windowWidth / 2}
-                    item={item}
-                    key={index}
-                  />
-                )}
-              />
-            ) : (
-              <LoadingSkeleton />
-            )}
-          </View>
-          <View style={[GlobalStyle.borderContainer]}>
-            <Text
-              style={{
-                fontFamily: 'FreightBigPro-Bold',
-                fontSize: generalFontSize + 8,
-                fontWeight: '900',
-                marginBottom: 20,
-                color: textColor,
-              }}>
-              All Products
-            </Text>
-            <HomeProducts />
-          </View>
+          ) : (
+            <LoadingSkeleton />
+          )} */}
+          {data?.length ? (
+            <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 20, paddingBottom: 20}}>
+              {data.map((item, index) => (
+                <Product
+                  key={item.id.toString()} // You can use item.id as the key
+                  width={isIpad ? (windowWidth - 60) / 3 : (windowWidth - 60) / 2}
+                  height={isIpad ? windowWidth / 3 : windowWidth / 2}
+                  item={item}
+                />
+              ))}
+            </View>
+          ) : (
+            <LoadingSkeleton />
+          )}
         </View>
-      </ScrollView>
-    </SafeAreaView>
+        <View style={[GlobalStyle.borderContainer]}>
+          <Text
+            style={{
+              fontFamily: 'FreightBigPro-Bold',
+              fontSize: generalFontSize + 8,
+              fontWeight: '900',
+              marginBottom: 20,
+              color: textColor,
+            }}>
+            All Products
+          </Text>
+          <HomeProducts />
+        </View>
+      </View>
+    </ScrollView>
   );
 };
 

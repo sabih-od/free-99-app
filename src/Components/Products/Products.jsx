@@ -81,7 +81,6 @@ const Products = ({title}) => {
   //   const width = Dimensions.get('window').width; // Get the window width
   const loading = useSelector(state => state.shop.loading); // Assume loading state from auth slice
   const categoryProduct = useSelector(state => state.shop.categoryProduct); // Products from the shop slice
-  // console.log('categoryProductcategoryProduct', categoryProduct)
   //   const navigation = useNavigation();
 
   return (

@@ -12,7 +12,7 @@ import { orderService } from '../../Services/orderService';
 import { successToast } from '../../Utils/toast';
 
 const Checkout = ({ navigation }) => {
-  const [loading, setLoading] = useState()
+  const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [cartItems, setCartItems] = useState(data);
@@ -264,7 +264,10 @@ const Checkout = ({ navigation }) => {
                 </View>
               </View>
             </ScrollView>
-            <AddressModal modalIsVisible={showModal} closeModal={toggleModal} />
+            <AddressModal 
+              modalIsVisible={showModal} 
+              closeModal={toggleModal} 
+            />
             <AddPhoneModal modalIsVisible={showPhoneModal} closeModal={togglePhoneModal} />
             <View style={{ position: 'absolute', bottom: 30, width: windowWidth - 40, left: 20 }}>
               <TouchableOpacity

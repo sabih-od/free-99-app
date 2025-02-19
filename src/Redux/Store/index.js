@@ -13,6 +13,8 @@ import reviewsReducer from './Slices/Reviews/index';
 import vendorOrderReducer from './Slices/VendorOrder/index';
 import packageReducer from "./Slices/Package/index"
 import notificationsReducer from "./Slices/Notifications/index";
+import chatReducer from "./Slices/Chat/index";
+import pusherReducer from "./Slices/Pusher/index";
 
 const persistConfig = {
   key: 'root',
@@ -31,7 +33,9 @@ const rootReducer = combineReducers({
   user: userReducer,
   vendorOrder: vendorOrderReducer,
   package: packageReducer,
-  notifications: notificationsReducer
+  notifications: notificationsReducer,
+  chat: chatReducer,
+  pusher: pusherReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

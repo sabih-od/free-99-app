@@ -10,6 +10,7 @@ const initialState = {
     data: null,
     token: '',
     loading: false,
+    authId: null
 };
 
 // Slice definition
@@ -25,6 +26,7 @@ export const authSlice = createSlice({
                 state.isAuthenticated = true;
                 state.token = action.payload?.data?.token;
                 state.data = action.payload?.data?.detail;
+                state.authId = action.payload?.data?.detail?.id
 
                 // AsyncStorage operations should be handled outside of reducers
                 AsyncStorage.setItem('token', action.payload?.data?.token);

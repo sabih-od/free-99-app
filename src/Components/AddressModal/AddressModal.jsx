@@ -68,7 +68,7 @@ const AddressModal = ({ modalIsVisible, closeModal }) => {
                         animationOut={"fadeOut"}
                     >
                         <View style={styles.modalContent}>
-                            {loading ? (
+                            {/* {loading ? (
                                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                                     <ActivityIndicator
                                         color={themeColor}
@@ -76,7 +76,7 @@ const AddressModal = ({ modalIsVisible, closeModal }) => {
                                     />
                                 </View>
                             )
-                                :
+                                : */}
                                 (
                                     <ScrollView style={styles.container}>
                                         <Text style={[GlobalStyle.mainTitle, { fontSize: generalFontSize + 4 }]}>Add New Address</Text>
@@ -169,7 +169,7 @@ const AddressModal = ({ modalIsVisible, closeModal }) => {
                                         </TouchableOpacity>
                                     </ScrollView>
                                 )
-                            }
+                            {/* } */}
                         </View>
                     </Modal>
                 </View>

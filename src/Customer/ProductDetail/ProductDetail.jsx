@@ -47,17 +47,15 @@ import {useSelector, useDispatch} from 'react-redux';
 import {cartService} from '../../Services/cartService';
 import {wishlistService} from '../../Services/wishlistService';
 import {shopService} from '../../Services/shopService';
-import AddReview from '../../Components/AddReview/AddReview';
 import ProductRating from '../../Components/ProductRating/ProductRating';
 import {productService} from '../../Services/productService';
-import ImageViewing from 'react-native-image-viewing';
-import {ImageViewer} from 'react-native-image-zoom-viewer';
-import {ImageGallery} from '@georstat/react-native-image-gallery';
-import {ImageZoom, ZOOM_TYPE} from '@likashefqet/react-native-image-zoom';
-import CustomInput from '../../Components/CustomInput/CustomInput';
 import axios from 'axios';
 import ImageModal from '../../Components/ImageModal';
 import { BASE_URL } from '../../Constants';
+import { chatService } from '../../Services/chatService';
+// import Chat from '../Chat';
+import Chat from '../../Components/Chat/Chat';
+import { resetChatMessages } from '../../Redux/Store/Slices/Chat';
 
 const LoadingSkeleton = () => {
   const [opacity] = useState(new Animated.Value(0.3));
@@ -153,6 +151,11 @@ const ProductDetail = ({navigation, route}) => {
   const [item, setItem] = useState();
   const isAuth = useSelector(state => state.auth.isAuthenticated);
   const authData = useSelector(state => state.auth.data);
+  const { messages } = useSelector(state => state.chat);
+  const { event } = useSelector(state => state.pusher);
+
+  const dispatch = useDispatch();
+
   const [isFav, setIsFav] = useState(false);
   const [disableBtn, setDisableBtn] = useState(item?.stock_quantity <= 0);
   const [prodLoading, setProdLoading] = useState();
@@ -518,12 +521,10 @@ const ProductDetail = ({navigation, route}) => {
     await productService.getProductDetail(id).then(async resp => {
       await setItem(resp.data);
       setProdLoading(prevFav => !prevFav);
-      //   console.log('item=> ', item);
     });
   }, []);
 
   useEffect(() => {
-    // console.log('id', id);
     const isWishlist = async id => {
       try {
         const response = await wishlistService.isWishlisted(id);
@@ -629,14 +630,16 @@ const ProductDetail = ({navigation, route}) => {
 
   // const galleryImages = currentIndex => setImg(item?.media[currentIndex]?.image);
 
-  // console.log('-->', img);
-
-  useEffect(() => {
-    console.log('item', item?.media)
-  }, [item]);
-
   return (
-    <View style={{backgroundColor: bgColor, flex: 1}}>
+    <ScrollView 
+      style={{
+        backgroundColor: bgColor, 
+        flex: 1, 
+        minHeight: windowHeight
+      }}
+      keyboardShouldPersistTaps="always"
+      // showsVerticalScrollIndicator={false}
+    >
       {prodLoading ? (
         <LoadingSkeleton />
       ) : isVisible ? (
@@ -650,10 +653,7 @@ const ProductDetail = ({navigation, route}) => {
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{flex: 1}}>
-          <ScrollView
-            keyboardShouldPersistTaps="always"
-            style={{minHeight: windowHeight}}
-            showsVerticalScrollIndicator={false}>
+          <View>
             <View style={styles.imgBox}>
               <View
                 style={[
@@ -934,13 +934,52 @@ const ProductDetail = ({navigation, route}) => {
                     Product Feedback
                   </Text>
                 </TouchableOpacity>
+
+                <View style={{
+                  marginTop: 25
+                }}>
+                  {/* <Chat 
+                    participants={[
+                      { 
+                        id: item?.user?.id, 
+                        name: item?.user?.name, 
+                        type: 'hunters-social', 
+                        // image: `${Routes.serverUrl}assets/images/ph-avatar.jpg`, 
+                        // isDisableInputArea: true 
+                      }
+                    ]} 
+                  /> */}
+
+                  <Chat
+                    participants={[
+                      { 
+                        user_id: item?.user?.id, 
+                        name: item?.user?.name
+                      }
+                    ]}
+                    messages={messages}
+                    get={({ conversationalItem }) => {
+                      chatService.fetchMessages(conversationalItem?.user_id)
+                    }}
+                    post={({ conversationalItem, payload }) => {
+                        chatService.sendMessages(conversationalItem?.user_id, payload)
+                            .then(() => {
+                                chatService.fetchMessages(conversationalItem?.user_id)
+                            })
+                    }}
+                    reset={() => dispatch(resetChatMessages())}
+                    event={event}
+                  />
+                </View>
               </View>
               <ProductFeedbackModal />
             </View>
-          </ScrollView>
+          </View>
         </KeyboardAvoidingView>
       )}
-    </View>
+
+      
+    </ScrollView>
   );
 };
 
