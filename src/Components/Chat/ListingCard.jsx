@@ -21,9 +21,21 @@ const ListingCard = ({item, actions = null}) => {
               style={styles.image}
           />
         </View>
-        <View>
-            <Text style={styles.title}>{ item?.name }</Text>
-        </View>
+        
+        {
+          item?.user 
+            ?
+              (
+                <View>
+                  { item?.user?.name && <Text style={styles.title}>{ item?.user?.name }</Text> }
+                  { item?.user?.email && <Text style={styles.title}>{ item?.user?.email }</Text> }
+                  { item?.user?.phone && <Text style={styles.title}>{ item?.user?.phone }</Text> }
+                  { item?.user?.address && <Text style={styles.title}>{ item?.user?.address }</Text> }
+                </View>
+              )
+            :
+              <Text style={styles.title}>{ item?.name }</Text>
+        }
       </View>
       <View>
           <TouchableOpacity 

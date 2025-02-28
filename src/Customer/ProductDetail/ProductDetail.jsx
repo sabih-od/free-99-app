@@ -952,9 +952,10 @@ const ProductDetail = ({navigation, route}) => {
 
                   <Chat
                     participants={[
-                      { 
-                        user_id: item?.user?.id, 
-                        name: item?.user?.name
+                      {
+                        user: item?.user,
+                        // user_id: item?.user?.id,
+                        // name: item?.user?.name,
                       }
                     ]}
                     messages={messages}
