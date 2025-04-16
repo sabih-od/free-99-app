@@ -33,7 +33,7 @@ import {wishlistService} from '../../../Services/wishlistService';
 import {logout} from '../../../Redux/Store/Slices/Auth';
 import {store} from '../../../Redux/Store';
 import {useSelector} from 'react-redux';
-import { Pusher } from '@pusher/pusher-websocket-react-native';
+import {Pusher} from '@pusher/pusher-websocket-react-native';
 
 const LoadingSkeleton = () => {
   const numSkeletonItems = 2; // Number of skeleton items to show
@@ -140,16 +140,15 @@ const Home = ({navigation}) => {
 
   return (
     <ScrollView
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            tintColor={whiteColor}
-            onRefresh={onRefresh}
-          />
-        }
-        style={{backgroundColor: bgColor, flex: 1}}
-      >
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          tintColor={whiteColor}
+          onRefresh={onRefresh}
+        />
+      }
+      style={{backgroundColor: bgColor, flex: 1}}>
       <View style={padding('bottom', 20)}>
         <ImageCarousel />
       </View>
@@ -204,11 +203,19 @@ const Home = ({navigation}) => {
             <LoadingSkeleton />
           )} */}
           {data?.length ? (
-            <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 20, paddingBottom: 20}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: 20,
+                paddingBottom: 20,
+              }}>
               {data.map((item, index) => (
                 <Product
                   key={item.id.toString()} // You can use item.id as the key
-                  width={isIpad ? (windowWidth - 60) / 3 : (windowWidth - 60) / 2}
+                  width={
+                    isIpad ? (windowWidth - 60) / 3 : (windowWidth - 60) / 2
+                  }
                   height={isIpad ? windowWidth / 3 : windowWidth / 2}
                   item={item}
                 />
@@ -239,11 +246,11 @@ const Home = ({navigation}) => {
 export default Home;
 
 const styles = StyleSheet.create({
-//   loadingContainer: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
+  //   loadingContainer: {
+  //     flex: 1,
+  //     justifyContent: 'center',
+  //     alignItems: 'center',
+  //   },
   skeletonItem: {
     width: '100%',
     height: 220,

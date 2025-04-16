@@ -85,8 +85,7 @@ const ProductsPg = () => {
             try {
                 const res = await productService.searchProduct(searchQuery);
 
-                const products = res?.data?.data;
-                console.log('products=> ', products)
+                const products = res?.data?.data; 
 
                 if (products && products.length > 0) {
                     setResults(products);
@@ -114,7 +113,7 @@ const ProductsPg = () => {
                         <FontAwesomeIcon icon={faSearch} color={'#828282'} size={generalFontSize - 4} />
                         <TextInput
                             ref={searchInputRef}
-                            style={{ marginLeft: 10, height: 40, flex: 1 }} // Adjust spacing as needed
+                            style={{ marginLeft: 10, height: 40, flex: 1 }}  
                             placeholder="Search"
                             placeholderTextColor="#828282"
                             value={searchQuery}

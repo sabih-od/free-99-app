@@ -1,16 +1,14 @@
-import { ActivityIndicator, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
-import { bgColor, blackColor, generalFontSize, GlobalStyle, itemBg, margin, padding, textColor, themeColor } from '../../../Styles/Theme';
+import {SafeAreaView, ScrollView, StyleSheet, View} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
+import {bgColor, GlobalStyle, margin, padding} from '../../../Styles/Theme';
 import Categories from '../../../Components/Categories/Categories';
 import Products from '../../../Components/Products/Products';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 import NotiModal from '../../../Components/NotiModal/NotiModal';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faSearch, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import HomeProducts from '../../../Components/HomeProducts/HomeProducts';
 
 const Shop = () => {
-  const loading = useSelector((state) => state.auth.loading);
+  const loading = useSelector(state => state.auth.loading);
   const searchInput = useRef();
   const [isProductLoading, setIsLoading] = useState(loading);
   const [searchValue, setSearchValue] = useState('');
@@ -32,7 +30,7 @@ const Shop = () => {
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: bgColor, flex: 1 }}>
+    <SafeAreaView style={{backgroundColor: bgColor, flex: 1}}>
       {/* <TouchableOpacity
         activeOpacity={1}
         onPress={() => {
@@ -60,20 +58,19 @@ const Shop = () => {
       </TouchableOpacity> */}
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={[GlobalStyle.container, padding('top', 15)]}>
-          <Categories mainTitle={"Categories"} onCategoryPress={handleCategoryPress} />
+          <Categories
+            mainTitle={'Categories'}
+            onCategoryPress={handleCategoryPress}
+          />
           {isProductLoading ? (
             <NotiModal
               canHide
               modalIsVisible={isProductLoading}
-              title={"Loading"}
+              title={'Loading'}
             />
           ) : (
-            <View style={margin("top", 10)}>
-              {showHomeProducts ? (
-                <HomeProducts />
-              ) : (
-                <Products />
-              )}
+            <View style={margin('top', 10)}>
+              {showHomeProducts ? <HomeProducts /> : <Products />}
             </View>
           )}
         </View>

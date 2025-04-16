@@ -6,6 +6,7 @@ import {
   setCategoryProduct,
   setAllCategoryProucts,
   setLoading,
+  setMoreCategoryProducts,
 } from '../Redux/Store/Slices/Shop';
 
 const apiClient = axios.create({
@@ -37,7 +38,6 @@ export const shopService = {
     store.dispatch(setLoading(true));
     try {
       const response = await apiClient.get(`/shop/category/${slug}`);
-
       store.dispatch(setCategoryProduct(response.data));
       store.dispatch(setLoading(false));
 
@@ -47,6 +47,14 @@ export const shopService = {
       throw error;
     } finally {
       store.dispatch(setLoading(false));
+    }
+  },
+  getMoreCategoryProducts: async url => {
+    try {
+      const response = await apiClient.get(url);
+      store.dispatch(setMoreCategoryProducts(response.data));
+    } catch (error) {
+      console.log('error', error);
     }
   },
   getAllCategoriesProducts: async (url = '/shop/category') => {

@@ -1,25 +1,9 @@
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  ActivityIndicator,
-  Animated,
-} from 'react-native';
+import {FlatList, StyleSheet, Text, View, Animated} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
-import {
-  GlobalStyle,
-  isIpad,
-  textColor,
-  whiteColor,
-  windowWidth,
-} from '../../Styles/Theme';
+import {GlobalStyle, isIpad, windowWidth} from '../../Styles/Theme';
 import Product from '../Product/Product';
-import {useNavigation} from '@react-navigation/native';
+import {shopService} from '../../Services/shopService';
 
 const LoadingSkeleton = () => {
   const numSkeletonItems = 6; // Number of skeleton items to show
@@ -78,10 +62,15 @@ const LoadingSkeleton = () => {
 };
 
 const Products = ({title}) => {
-  //   const width = Dimensions.get('window').width; // Get the window width
-  const loading = useSelector(state => state.shop.loading); // Assume loading state from auth slice
-  const categoryProduct = useSelector(state => state.shop.categoryProduct); // Products from the shop slice
-  //   const navigation = useNavigation();
+  const loading = useSelector(state => state.shop.loading);
+  const {categoryProduct, pagination} = useSelector(state => state.shop);
+
+  const loadMore = () => {
+    if (pagination.next_page_url) {
+      const url = pagination.next_page_url.split('api');
+      shopService.getMoreCategoryProducts(url[1]);
+    }
+  };
 
   return (
     <>
@@ -113,6 +102,8 @@ const Products = ({title}) => {
                   key={index}
                 />
               )}
+              onEndReachedThreshold={0.3}
+              onEndReached={loadMore}
             />
           ) : (
             <View style={{flex: 1, justifyContent: 'space-between'}}>

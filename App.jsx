@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {DarkTheme, NavigationContainer} from '@react-navigation/native';
 import RootNavigation from './src/Navigation';
 import {Provider, useSelector} from 'react-redux';
@@ -10,7 +10,7 @@ import {blackColor} from './src/Styles/Theme';
 import {StripeProvider} from '@stripe/stripe-react-native';
 import {PusherService} from './src/Services/pusherService';
 import {LogBox, StatusBar} from 'react-native';
-import { setEvent } from './src/Redux/Store/Slices/Pusher';
+import {setEvent} from './src/Redux/Store/Slices/Pusher';
 
 LogBox.ignoreAllLogs(true);
 
@@ -27,15 +27,15 @@ function ChannelSubscription() {
   }, []);
 
   useEffect(() => {
-    if(authId && pusher && (typeof pusher.subscribe === 'function')) {
+    if (authId && pusher && typeof pusher.subscribe === 'function') {
       pusher.subscribe({
         channelName: `chat.${authId}`,
-        onEvent: (event) => store.dispatch(setEvent(event))
+        onEvent: event => store.dispatch(setEvent(event)),
       });
     }
 
     return () => {
-      if(authId && pusher && (typeof pusher.subscribe === 'function')) {
+      if (authId && pusher && typeof pusher.subscribe === 'function') {
         pusher.unsubscribe({channelName: `chat.${authId}`});
       }
     };
@@ -45,7 +45,6 @@ function ChannelSubscription() {
 }
 
 function App() {
-
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
@@ -64,7 +63,6 @@ function App() {
               backgroundColor={blackColor}
             />
             <Toast position="top" topOffset={50} />
-            
           </StripeProvider>
         </NavigationContainer>
       </PersistGate>
