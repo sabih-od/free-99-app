@@ -41,10 +41,6 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
 
     const { control, handleSubmit, formState: { errors }, setValue, reset } = useForm();
 
-    useEffect(() => {
-        console.log('token', token)
-    }, [token]);
-
     const renderItem = item => {
         return (
             <View style={styles.item}>
