@@ -10,7 +10,6 @@ const bannerApiClient = axios.create({
   },
 });
 
-// Ensuring the authorization token is attached to each request
 bannerApiClient.interceptors.request.use(
   config => {
     const {auth} = store.getState();
@@ -26,7 +25,6 @@ export const bannerService = {
   getBanners: async () => {
     try {
       const response = await bannerApiClient.get('/banner');
-      console.log('-->', response.data);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch banners:', error);

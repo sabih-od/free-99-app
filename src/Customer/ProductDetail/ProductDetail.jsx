@@ -51,11 +51,11 @@ import ProductRating from '../../Components/ProductRating/ProductRating';
 import {productService} from '../../Services/productService';
 import axios from 'axios';
 import ImageModal from '../../Components/ImageModal';
-import { BASE_URL } from '../../Constants';
-import { chatService } from '../../Services/chatService';
+import {BASE_URL} from '../../Constants';
+import {chatService} from '../../Services/chatService';
 // import Chat from '../Chat';
 import Chat from '../../Components/Chat/Chat';
-import { resetChatMessages } from '../../Redux/Store/Slices/Chat';
+import {resetChatMessages} from '../../Redux/Store/Slices/Chat';
 
 const LoadingSkeleton = () => {
   const [opacity] = useState(new Animated.Value(0.3));
@@ -151,8 +151,8 @@ const ProductDetail = ({navigation, route}) => {
   const [item, setItem] = useState();
   const isAuth = useSelector(state => state.auth.isAuthenticated);
   const authData = useSelector(state => state.auth.data);
-  const { messages } = useSelector(state => state.chat);
-  const { event } = useSelector(state => state.pusher);
+  const {messages} = useSelector(state => state.chat);
+  const {event} = useSelector(state => state.pusher);
 
   const dispatch = useDispatch();
 
@@ -279,14 +279,12 @@ const ProductDetail = ({navigation, route}) => {
                     color: blackColor,
                     fontSize: generalFontSize,
                     ...fontFamily('regular'),
-                  }}>
-                  
-                </Text>
+                  }}></Text>
                 <TextInput
                   keyboardType="string"
                   style={{
                     color: blackColor,
-                    flex: 1, 
+                    flex: 1,
                     marginLeft: 5,
                     fontSize: generalFontSize,
                     ...fontFamily('regular'),
@@ -327,12 +325,8 @@ const ProductDetail = ({navigation, route}) => {
           </View>
         </View>
       </Modal>
-
-
-
-
     );
-  }
+  };
   const BestOfferModal = () => {
     const [bestOfferPrice, setBestOfferPrice] = useState('');
     const submitBestOffer = async () => {
@@ -493,10 +487,6 @@ const ProductDetail = ({navigation, route}) => {
           </View>
         </View>
       </Modal>
-
-
-
-
     );
   };
 
@@ -631,11 +621,11 @@ const ProductDetail = ({navigation, route}) => {
   // const galleryImages = currentIndex => setImg(item?.media[currentIndex]?.image);
 
   return (
-    <ScrollView 
+    <ScrollView
       style={{
-        backgroundColor: bgColor, 
-        flex: 1, 
-        minHeight: windowHeight
+        backgroundColor: bgColor,
+        flex: 1,
+        minHeight: windowHeight,
       }}
       keyboardShouldPersistTaps="always"
       // showsVerticalScrollIndicator={false}
@@ -894,7 +884,7 @@ const ProductDetail = ({navigation, route}) => {
               </View>
 
               <View style={padding('bottom', 10)}>
-              <TouchableOpacity
+                <TouchableOpacity
                   disabled={disableBtn}
                   onPress={() => {
                     if (
@@ -935,9 +925,10 @@ const ProductDetail = ({navigation, route}) => {
                   </Text>
                 </TouchableOpacity>
 
-                <View style={{
-                  marginTop: 25
-                }}>
+                <View
+                  style={{
+                    marginTop: 25,
+                  }}>
                   {/* <Chat 
                     participants={[
                       { 
@@ -956,17 +947,20 @@ const ProductDetail = ({navigation, route}) => {
                         user: item?.user,
                         // user_id: item?.user?.id,
                         // name: item?.user?.name,
-                      }
+                      },
                     ]}
                     messages={messages}
-                    get={({ conversationalItem }) => {
-                      chatService.fetchMessages(conversationalItem?.user_id)
+                    get={({conversationalItem}) => {
+                      chatService.fetchMessages(conversationalItem?.user?.id);
                     }}
-                    post={({ conversationalItem, payload }) => {
-                        chatService.sendMessages(conversationalItem?.user_id, payload)
-                            .then(() => {
-                                chatService.fetchMessages(conversationalItem?.user_id)
-                            })
+                    post={({conversationalItem, payload}) => {
+                      chatService
+                        .sendMessages(conversationalItem?.user?.id, payload)
+                        .then(() => {
+                          chatService.fetchMessages(
+                            conversationalItem?.user?.id,
+                          );
+                        });
                     }}
                     reset={() => dispatch(resetChatMessages())}
                     event={event}
@@ -978,8 +972,6 @@ const ProductDetail = ({navigation, route}) => {
           </View>
         </KeyboardAvoidingView>
       )}
-
-      
     </ScrollView>
   );
 };

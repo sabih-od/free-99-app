@@ -1,11 +1,10 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {useEffect} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React from 'react';
 import {faMessage} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {COLORS} from '../../Constants/COLORS';
 import {SIZES} from '../../Constants/Screens/Screens';
-import {APP_URL} from '../../Constants';
-import {themeColor} from '../../Styles/Theme';
+import {textColor, themeColor} from '../../Styles/Theme';
 
 const ListingCard = ({item, actions = null}) => {
   return (
@@ -46,9 +45,18 @@ const ListingCard = ({item, actions = null}) => {
     //   </TouchableOpacity>
     // </View>
     <TouchableOpacity
-      style={styles.buttonNew}
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}
       onPress={() => actions.conversation(item)}>
-      <FontAwesomeIcon icon={faMessage} color={COLORS.white} size={20} />
+      <Text style={{color: textColor, fontSize: SIZES.fullWidth * 0.05}}>
+        {item?.name}
+      </Text>
+      <View style={styles.buttonNew}>
+        <FontAwesomeIcon icon={faMessage} color={COLORS.white} size={20} />
+      </View>
     </TouchableOpacity>
   );
 };
