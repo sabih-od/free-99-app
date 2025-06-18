@@ -929,18 +929,6 @@ const ProductDetail = ({navigation, route}) => {
                   style={{
                     marginTop: 25,
                   }}>
-                  {/* <Chat 
-                    participants={[
-                      { 
-                        id: item?.user?.id, 
-                        name: item?.user?.name, 
-                        type: 'hunters-social', 
-                        // image: `${Routes.serverUrl}assets/images/ph-avatar.jpg`, 
-                        // isDisableInputArea: true 
-                      }
-                    ]} 
-                  /> */}
-
                   <Chat
                     participants={[
                       {

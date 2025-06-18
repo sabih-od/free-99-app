@@ -117,8 +117,6 @@ const VendorUpdateProduct = ({ navigation, toggleUpdateModal, updateProduct }) =
     // }
 
     const deleteImage = (productId, imageId) => {
-        console.log('productId, imageId', productId, imageId);
-
         productService.removeGalleryImages(productId, imageId)
             .then(() => {
                 setPhotos((prevPhotos) => prevPhotos.filter(photo => photo?.id !== imageId));

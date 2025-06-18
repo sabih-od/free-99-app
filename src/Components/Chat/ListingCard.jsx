@@ -1,12 +1,17 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {faMessage} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {COLORS} from '../../Constants/COLORS';
 import {SIZES} from '../../Constants/Screens/Screens';
 import {textColor, themeColor} from '../../Styles/Theme';
+import {useSelector} from 'react-redux';
+import {useNavigation} from '@react-navigation/native';
 
 const ListingCard = ({item, actions = null}) => {
+  const isAuth = useSelector(state => state.auth.isAuthenticated);
+  const navigation = useNavigation();
+
   return (
     // <View style={styles.card}>
     //   <View style={styles.info}>
@@ -50,7 +55,17 @@ const ListingCard = ({item, actions = null}) => {
         justifyContent: 'space-between',
         alignItems: 'center',
       }}
-      onPress={() => actions.conversation(item)}>
+      onPress={() =>
+        isAuth
+          ? actions.conversation(item)
+          : Alert.alert('Login Required', 'You need to Login to add feeback', [
+              {text: 'cancel'},
+              {
+                text: 'login',
+                onPress: () => navigation.navigate('login'),
+              },
+            ])
+      }>
       <Text style={{color: textColor, fontSize: SIZES.fullWidth * 0.05}}>
         {item?.name}
       </Text>

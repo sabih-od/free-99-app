@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {DarkTheme, NavigationContainer} from '@react-navigation/native';
 import RootNavigation from './src/Navigation';
 import {Provider, useSelector} from 'react-redux';
