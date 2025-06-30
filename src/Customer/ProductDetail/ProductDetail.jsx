@@ -745,6 +745,11 @@ const ProductDetail = ({navigation, route}) => {
                       Viewed by {item?.product_views?.length} people.
                     </Text>
                   )}
+                  {item?.shipping_price > 0 && (
+                    <Text style={styles.minTitle}>
+                      Shipping Price ${item?.shipping_price}
+                    </Text>
+                  )}
                 </View>
                 <View style={{alignItems: 'center'}}>
                   <Text style={styles.itemPrice}>${item?.price}</Text>
