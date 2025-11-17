@@ -7,7 +7,6 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Modal,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -22,9 +21,7 @@ import {
   gap,
   generalFontSize,
   GlobalStyle,
-  margin,
   padding,
-  secondColor,
   textColor,
   fontFamily,
   itemBg,
@@ -53,7 +50,6 @@ import axios from 'axios';
 import ImageModal from '../../Components/ImageModal';
 import {BASE_URL} from '../../Constants';
 import {chatService} from '../../Services/chatService';
-// import Chat from '../Chat';
 import Chat from '../../Components/Chat/Chat';
 import {resetChatMessages} from '../../Redux/Store/Slices/Chat';
 
@@ -177,30 +173,25 @@ const ProductDetail = ({navigation, route}) => {
       }
       setProductFeedbackLoading(true);
 
-      // Set up form data
       const formData = new FormData();
       formData.append('product_id', id);
       formData.append('feedback', feedback);
 
-      // Set up headers
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
       try {
         const response = await axios.post(
-          // 'https://dev.free99us.com/api/product/best/offer',
-          'https://free99us.com/api/product-feedback',
+          `${BASE_URL}/product-feedback`,
           formData,
-          {headers},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
 
-        // Handle success response
         successToast(response.data.message);
         setProductFeedbackVisble(false);
         setFeedack('');
       } catch (error) {
-        // Handle error response
         errorToast('Failed to submit feedback. Please try again.');
         console.error('Error submitting feedback:', error);
       } finally {
@@ -327,6 +318,7 @@ const ProductDetail = ({navigation, route}) => {
       </Modal>
     );
   };
+
   const BestOfferModal = () => {
     const [bestOfferPrice, setBestOfferPrice] = useState('');
     const submitBestOffer = async () => {
@@ -336,37 +328,35 @@ const ProductDetail = ({navigation, route}) => {
 
       setBestOfferLoading(true);
 
-      // Set up form data
-      const formData = new FormData();
-      formData.append('productId', id);
-      formData.append('price', bestOfferPrice);
-
-      // Set up headers
-      const headers = {
-        Authorization: `Bearer ${token}`,
+      const data = {
+        productId: id,
+        bestOffer: bestOfferPrice,
       };
 
       try {
         const response = await axios.post(
-          // 'https://dev.free99us.com/api/product/best/offer',
-          // 'https://free99us.com/api/product/best/offer',
           `${BASE_URL}/product/best/offer`,
-          formData,
-          {headers},
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
 
-        // Handle success response
         successToast(response.data.message);
         setBestOfferModalVisible(false);
         setBestOfferPrice('');
+        navigation.goBack();
       } catch (error) {
-        // Handle error response
         errorToast('Failed to submit best offer. Please try again.');
         console.error('Error submitting best offer:', error);
+        console.error('Error submitting best offer:', error.response.data);
       } finally {
         setBestOfferLoading(false);
       }
     };
+
     return (
       <Modal
         avoidKeyboard={true}
@@ -443,7 +433,6 @@ const ProductDetail = ({navigation, route}) => {
                   $
                 </Text>
                 <TextInput
-                  keyboardType="numeric"
                   style={{
                     color: blackColor,
                     flex: 1,
@@ -451,10 +440,12 @@ const ProductDetail = ({navigation, route}) => {
                     fontSize: generalFontSize,
                     ...fontFamily('regular'),
                   }}
-                  placeholder="Enter Price"
+                  placeholder={'Enter Price and reason'}
                   placeholderTextColor={'grey'}
                   value={bestOfferPrice}
                   onChangeText={setBestOfferPrice}
+                  multiline
+                  numberOfLines={3}
                 />
               </View>
             </View>
@@ -515,19 +506,21 @@ const ProductDetail = ({navigation, route}) => {
   }, []);
 
   useEffect(() => {
-    const isWishlist = async id => {
-      try {
-        const response = await wishlistService.isWishlisted(id);
+    if (isAuth) {
+      const isWishlist = async id => {
+        try {
+          const response = await wishlistService.isWishlisted(id);
 
-        setIsFav(true);
-      } catch (error) {
-        console.error('Failed to fetch:', error);
-        setIsFav(false);
-      }
-    };
+          setIsFav(true);
+        } catch (error) {
+          console.error('Failed to fetch:', error);
+          setIsFav(false);
+        }
+      };
 
-    isWishlist(id);
-  }, [id]);
+      isWishlist(id);
+    }
+  }, [id, isAuth]);
 
   useEffect(() => {
     fetchProduct();
