@@ -80,7 +80,7 @@ android {
     defaultConfig {
         applicationId "com.app.free99"
         minSdkVersion 23
-        targetSdkVersion 34
+        targetSdkVersion 35
         versionCode 18
         versionName "18"
         multiDexEnabled true
